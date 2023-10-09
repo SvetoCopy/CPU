@@ -10,6 +10,9 @@ int AssemblyCommand(char* str, char* res) {
 	char type[COMMAND_SIZE];
 	int value = 0;
 
+	// %[]
+	// %n
+	// 
 	int arg_count = sscanf(str, "%s %d", &type, &value);
 
 	if (arg_count <= 0) return -1;

@@ -1,9 +1,22 @@
 #include "SPU.h"
 
-Logger loggerCPU;
+int SPUDump(SPU* spu) {
+	StackDump(&(spu->stack));
+	fprintf((spu->stack).logger.file, "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
+	return 0;
+}
 
-int CPUDtor(CPU* cpu) {
-	StackDtor(&(cpu->stack));
+int SPUVerify(SPU* spu) {
+	return 0;
+}
+
+int SPUCtor(SPU* spu) {
+	StackCtor(&(spu->stack), 2, "CPUlogger.log");
+	return 0;
+}
+
+int SPUDtor(SPU* spu) {
+	StackDtor(&(spu->stack));
 	return 0;
 }
 
@@ -17,28 +30,27 @@ int ReadCommand(char* str, Command* command) {
 #define DEF_CMD(name, code, handle) case name: handle; break;
 
 int ExecuteProgramm(FileInfo* file, FILE* out) {
-	CPU cpu = {};
-	StackCtor(&(cpu.stack), file->n_lines);
-	LoggerCtor("CPUlogger.log", &(loggerCPU));
-
-	assert(loggerCPU.file != NULL);
+	SPU spu = {};
+	SPUCtor(&spu);
 
 	for (int i = 0; i < file->n_lines; i++) {
 		Command command = {};
 		if (ReadCommand(file->text[i], &command) == -1) {
-			fprintf(loggerCPU.file, "Error in %d command", i + 1);
-			LoggerDtor(&loggerCPU);
+			fprintf(stderr, "Error in %d command", i + 1);
 			return -1;
 		}
-		int a = 0;
-		int b = 0;
-		StackDump(&(cpu.stack));
+		int a1 = 0;
+		int b1 = 0;
+		float a2 = 0;
+		float b2 = 0;
+		
+		int n = 0;
+		SPUDump(&spu);
 		switch (command.type)
 		{
 		#include "C:\Users\Рузаль\Desktop\CPU\resource\def_cmd.h"
 		default:
-			fprintf(loggerCPU.file, "Error in %d command", i + 1);
-			LoggerDtor(&loggerCPU);
+			fprintf(stderr, "Error in %d command", i + 1);
 			return -1;
 			break;
 		}

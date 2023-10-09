@@ -2,14 +2,16 @@
 #define DED_LOGGER
 #include "stdio.h"
 
-struct Logger {
+struct LogFile {
 	FILE* file;
 	const char* name;
 	bool is_opened;
 };
 
-int LoggerCtor(const char* name, Logger* logger);
-int LoggerDtor(Logger* logger);
+int LogFileCtor(const char* name, LogFile* logger);
+// LoggerPrint()
+// 
+int LogFileDtor(LogFile* logger);
 
 
 #endif // !DED_LOGGER

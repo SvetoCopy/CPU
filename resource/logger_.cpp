@@ -1,13 +1,13 @@
 #include "logger_.h"
 
-int LoggerCtor(const char* name, Logger* logger) {
+int LogFileCtor(const char* name, LogFile* logger) {
 	logger->name = name;
 	fopen_s(&(logger->file), logger->name, "w");
 	logger->is_opened = true;
 	return 0;
 }
 
-int LoggerDtor(Logger* logger) {
+int LogFileDtor(LogFile* logger) {
 	fclose(logger->file);
 	logger->file = nullptr;
 	logger->name = nullptr;

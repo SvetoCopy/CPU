@@ -5,13 +5,36 @@
 #include "C:\Users\Рузаль\Desktop\CPU\resource\iso.h"
 #include <C:\Users\Рузаль\Desktop\CPU\resource\logger_.h>
 
+
+const int FACTOR = 3;
+
 struct Command {
 	int value;
-	int factor;
 	int type;
 };
 
-struct CPU {
+// 32 bit - ARM RISC-V
+// 
+// 8 bit
+// 64 = 2^6
+// 9 bit - 16 bit
+// struct Opcode
+// {
+//		int code: 6;
+//		int arg_type : 2;
+// 
+// char* = load_binary()
+// RISC 
+// CISC - x86
+// 1 byte - 15 byte
+
+// execute_code()
+// {
+//     Opcode opcode = *(Opcode*)code;
+//	   opcode->code = ;
+//     
+
+struct SPU {
 	Stack stack;
 };
 
@@ -20,8 +43,10 @@ struct CPU {
 // {
 //    char* [];
 // }
-
-int CPUDtor(CPU* cpu);
+int SPUCtor(SPU* spu);
+int SPUDtor(SPU* spu);
+int SPUDump(SPU* spu);
+int SPUVerify(SPU* spu);
 
 int ReadCommand(char* str, Command* command);
 int ExecuteProgramm(FileInfo* file, FILE* out);
