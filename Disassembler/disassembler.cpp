@@ -6,7 +6,7 @@ if (type_code == code){\
 	is_found = true;\
 }
 
-Logger loggerDASM;
+LogFile loggerDASM;
 
 int DisassemblyCommand(char* str, char* res) {
 
@@ -33,7 +33,7 @@ int DisassemblyCommand(char* str, char* res) {
 
 int DisassemblyProgramm(FileInfo* file, const char* res_file) {
 	FILE* res = {};
-	LoggerCtor("ASM_log.log", &loggerDASM);
+	LogFileCtor("ASM_log.log", &loggerDASM);
 
 	fopen_s(&res, res_file, "w");
 
@@ -45,7 +45,7 @@ int DisassemblyProgramm(FileInfo* file, const char* res_file) {
 
 		if (DisassemblyCommand(file->text[i], command) == -1) {
 			fprintf(loggerDASM.file, "Unknown command in %d line", i + 1);
-			LoggerDtor(&loggerDASM);
+			LogFileDtor(&loggerDASM);
 			return 0;
 		}
 

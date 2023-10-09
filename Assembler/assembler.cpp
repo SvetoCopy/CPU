@@ -2,7 +2,7 @@
 
 #define DEF_CMD(name, code, ...) if (strcmp(type, #name) == 0) type_code = code;
 
-Logger loggerASM;
+LogFile loggerASM;
 
 int AssemblyCommand(char* str, char* res) {
 
@@ -32,7 +32,7 @@ int AssemblyCommand(char* str, char* res) {
 }
 int AssemblyProgramm(FileInfo* file, const char* res_file) {
 	FILE* res = {};
-	LoggerCtor("ASM_log.log", &loggerASM);
+	LogFileCtor("ASM_log.log", &loggerASM);
 
 	fopen_s(&res, res_file, "w");
 
@@ -44,7 +44,7 @@ int AssemblyProgramm(FileInfo* file, const char* res_file) {
 
 		if (AssemblyCommand(file->text[i], command) == -1) {
 			fprintf(loggerASM.file, "Unknown command in %d line", i + 1);
-			LoggerDtor(&loggerASM);
+			LogFileDtor(&loggerASM);
 			return 0;
 		}
 

@@ -4,10 +4,10 @@
 
 // g++ -I main.cpp
 
-#include "../resource/iso.h"
+#include "..\resource\isa.h"
 #include <string.h>
-#include <C:\Users\Рузаль\Desktop\onegin\onegin\onegin\super_io.h>
-#include "C:\Users\Рузаль\Desktop\CPU\resource\logger_.h"
+#include "..\resource\RuzalLib\super_io.h"
+#include "..\resource\logger_.h"
 #include <math.h>
 
 const int COMMAND_SIZE = 5;
