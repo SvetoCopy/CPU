@@ -4,11 +4,18 @@
 
 LogFile loggerASM;
 
-int AssemblyCommand(char* str, char* res) {
+int DetermineReg(char* str) {
+	if ((strlen(str) == REG_SIZE) && (str[0] = 'R') && (str[2] = 'X')) {
+		return str[1] - 'A';
+	}
+	else return -1;
+}
+
+int AssemblyCommand(char* str, FILE* res) {
 
 	assert(str != 0);
 	char type[COMMAND_SIZE];
-	int value = 0;
+	int  value = 0;
 
 	// %[]
 	// %n
@@ -23,13 +30,33 @@ int AssemblyCommand(char* str, char* res) {
 #include "C:\Users\Рузаль\Desktop\CPU\resource\def_cmd.h"
 	if (type_code == -1) return -1;
 	if (type_code == PUSH) {
-		int n = sprintf_s(res, COMMAND_SIZE, "%d %d", type_code, value);
+		if (arg_count == 1) {
+			type_code = 1 + pow(2, 6) * 2;
+
+			
+			char reg_name[1000] = {};
+			
+			int arg_count2 = sscanf(str, "%s %s", &type, &reg_name);
+
+			// TODO: Write in logger
+			if (arg_count2 < 2) return -1;
+			int   reg_num = DetermineReg(reg_name);
+			
+			// TODO: Write in logger
+			if (reg_num == -1) return -1;
+
+			value = reg_num;
+
+		}else type_code = 1 + pow(2, 6) * 1;
+
+		int n = fprintf(res,"%d %d\n", type_code, value);
 		return 0;
 	}
 
-	int n = sprintf_s(res, COMMAND_SIZE, "%d", type_code);
+	int n = fprintf(res, "%d\n", type_code);
 	return 0;
 }
+
 int AssemblyProgramm(FileInfo* file, const char* res_file) {
 	FILE* res = {};
 	LogFileCtor("ASM_log.log", &loggerASM);
@@ -42,13 +69,11 @@ int AssemblyProgramm(FileInfo* file, const char* res_file) {
 
 		char command[COMMAND_SIZE] = {};
 
-		if (AssemblyCommand(file->text[i], command) == -1) {
+		if (AssemblyCommand(file->text[i], res) == -1) {
 			fprintf(loggerASM.file, "Unknown command in %d line", i + 1);
 			LogFileDtor(&loggerASM);
 			return 0;
 		}
-
-		fprintf(res, "%s\n", command);
 	}
 	fclose(res);
 	return 0;

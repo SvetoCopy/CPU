@@ -5,7 +5,8 @@
 #include "..\resource\isa.h"
 #include <string.h>
 #include "..\resource\RuzalLib\super_io.h"
-#include "..\resource\logger_.h"
+#include "..\resource\RuzalLib\logger_.h"
+#include "..\resource\utility.h"
 
 const int COMMAND_SIZE = 10;
 
