@@ -5,16 +5,14 @@
 #include "..\resource\isa.h"
 #include "..\resource\RuzalLib\logger_.h"
 #include "string.h"
+#include "..\resource\utility.h"
 
 typedef double Reg_t;
 
 const int FACTOR = 3;
-const int REG_SIZE = 3;
 
-struct Command {
-	int value;
-	int type;
-};
+
+
 
 // 32 bit - ARM RISC-V
 // 
@@ -22,11 +20,6 @@ struct Command {
 // 64 = 2^6
 // 9 bit - 16 bit
 
-struct Opcode
-{
-	unsigned int code : 6;
-	unsigned int arg_type : 2;
-};
 
 // char* = load_binary()
 // RISC 
@@ -45,6 +38,9 @@ struct SPU {
 	Reg_t rbx;
 	Reg_t rcx;
 	Reg_t rdx;
+	int ip;
+	size_t CS_size;
+	char* CS;
 };
 
 
@@ -52,11 +48,11 @@ struct SPU {
 // {
 //    char* [];
 // }
-int SPUCtor(SPU* spu);
+int SPUCtor(SPU* spu, FileInfo* file);
 int SPUDtor(SPU* spu);
 int SPUDump(SPU* spu);
 int SPUVerify(SPU* spu);
 
-int ReadCommand(char* str, Opcode* opcode, double* value);
+int ReadCommand(char* str, int* command, double* value, int* reg_num);
 int ExecuteProgramm(FileInfo* file, FILE* out);
 #endif

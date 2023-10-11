@@ -29,28 +29,35 @@ int AssemblyCommand(char* str, FILE* res) {
 	// find command ( check define )
 #include "C:\Users\Рузаль\Desktop\CPU\resource\def_cmd.h"
 	if (type_code == -1) return -1;
-	if (type_code == PUSH) {
+	if ((type_code == PUSH)||(type_code == POP)) {
 		if (arg_count == 1) {
-			type_code = 1 + pow(2, 6) * 2;
+			if (type_code == PUSH) type_code = PUSH + pow(2, 6) * 2;
+			if (type_code == POP) type_code = POP + pow(2, 6) * 2;
 
 			
-			char reg_name[1000] = {};
+			char reg_name[COMMAND_SIZE] = {};
 			
 			int arg_count2 = sscanf(str, "%s %s", &type, &reg_name);
 
 			// TODO: Write in logger
 			if (arg_count2 < 2) return -1;
-			int   reg_num = DetermineReg(reg_name);
+			int reg_num = DetermineReg(reg_name);
 			
 			// TODO: Write in logger
 			if (reg_num == -1) return -1;
 
 			value = reg_num;
 
-		}else type_code = 1 + pow(2, 6) * 1;
+		}
+		else {
+			if (type_code == PUSH) type_code = PUSH + pow(2, 6) * 1;
+			if (type_code == POP) type_code = POP + pow(2, 6) * 1;
+		}
 
 		int n = fprintf(res,"%d %d\n", type_code, value);
 		return 0;
+	}if (type_code == POP) {
+
 	}
 
 	int n = fprintf(res, "%d\n", type_code);

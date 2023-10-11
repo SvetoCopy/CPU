@@ -12,7 +12,7 @@
 #include "..\resource\utility.h"
 
 const int COMMAND_SIZE = 10;
-const int REG_SIZE = 3;
+
 
 struct ASM {
 	FileInfo* file_inp;

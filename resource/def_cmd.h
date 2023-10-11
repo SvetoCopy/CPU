@@ -1,10 +1,10 @@
-#define StackPop(a, b) if (StackPop(a, b) == -1) { fprintf(stderr, "Error in %d command", i + 1); return -1;}
+#define StackPop(a, b) if (StackPop(a, b) == -1) { fprintf(stderr, "Error in %d command", line_iter + 1); return -1;}
 
 DEF_CMD(PUSH, 1,
 	if (opcode.arg_type == 1) StackPush(&(spu.stack), value);
 	else if (opcode.arg_type == 2) {
-		Stack* spu_var = (Stack*)(&spu) + 1;
-		double* reg_var = (double*)(spu_var) + (int)value;
+		spu_var = (Stack*)(&spu) + 1;
+		reg_var = (double*)(spu_var) + reg_num;
 		StackPush(&(spu.stack), *reg_var);
 	}
 	else return -1;
@@ -51,6 +51,16 @@ DEF_CMD(COS, 8,
 
 DEF_CMD(HLT, 9, 
 	return 0;
+	)
+DEF_CMD(POP, 10,
+	if (opcode.arg_type == 1) {
+		fprintf(stderr, "IMM in POP argument");
+		return -1;
+	}
+	spu_var = (Stack*)(&spu) + 1;
+	reg_var = (double*)(spu_var) + reg_num;
+	StackPop(&(spu.stack), reg_var);
+
 	)
 #undef StackPop
 // DEF_CMD(COS, 10, ...)
