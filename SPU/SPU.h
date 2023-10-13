@@ -9,45 +9,23 @@
 
 typedef double Reg_t;
 
-const int FACTOR = 3;
-
-
-
-
-// 32 bit - ARM RISC-V
-// 
-// 8 bit
-// 64 = 2^6
-// 9 bit - 16 bit
-
-
-// char* = load_binary()
-// RISC 
-// CISC - x86
-// 1 byte - 15 byte
-
-// execute_code()
-// {
-//     Opcode opcode = *(Opcode*)code;
-//	   opcode->code = ;
-//     
-
-struct SPU {
-	Stack stack;
-	Reg_t rax;
-	Reg_t rbx;
-	Reg_t rcx;
-	Reg_t rdx;
-	int ip;
-	size_t CS_size;
-	char* CS;
+enum Errors_SPU {
+	CS_RANGE_ERROR = 0,
+	CS_NULLPTR = 1
 };
 
+struct SPU {
+	Stack   stack;
+	Reg_t   rax;
+	Reg_t   rbx;
+	Reg_t   rcx;
+	Reg_t   rdx;
+	int     ip;
+	size_t  CS_size;
+	char*   CS;
+	LogFile logfile;
+};
 
-// struct Loader
-// {
-//    char* [];
-// }
 int SPUCtor(SPU* spu, FileInfo* file);
 int SPUDtor(SPU* spu);
 int SPUDump(SPU* spu);
@@ -55,4 +33,6 @@ int SPUVerify(SPU* spu);
 
 int ReadCommand(char* str, int* command, double* value, int* reg_num);
 int ExecuteProgramm(FileInfo* file, FILE* out);
+
+int CSInsert(char* CS, char* text);
 #endif
