@@ -37,42 +37,39 @@ int SPUDtor(SPU* spu) {
 }
 
 
-int CSInsert(char** CS, FileInfo* file) {
-	fread(*CS, sizeof(char), file->buff_size, file->input_file);
+int CSInsert(CS* cs, FileInfo* file) {
+	fread(cs->CS, sizeof(char), file->buff_size, file->input_file);
 	return 0;
 }
 
-int ReadCommand(char** CS_ptr, size_t* ip, Opcode* opcode){
-	*opcode = *(Opcode*)((int*)(*CS_ptr));
-	*CS_ptr = (char*)((int*)(*CS_ptr)+1);
-
+int ReadCommand(CS* cs, size_t* ip, Opcode* opcode){
+	*opcode = *(Opcode*)((int*)(cs->CS + *ip));
 	*ip += sizeof(int);
 	return 0;
 }
 
-int ReadRegArg(char** CS_ptr, size_t* ip, int* reg_num) {
-	*reg_num = *(int*)(*CS_ptr);
-	*CS_ptr = (char*)((int*)*CS_ptr + 1);
-
+int ReadRegArg(CS* cs, size_t* ip, int* reg_num) {
+	*reg_num = *(int*)(cs->CS + *ip);
 	*ip += sizeof(int);
 	return 0;
 }
 
-int ReadImmArg(char** CS_ptr, size_t* ip, double* value) {
-	*value = *(double*)(*CS_ptr);
-	*CS_ptr = (char*)((double*)*CS_ptr + 1);
-
+int ReadImmArg(CS* cs, size_t* ip, double* value) {
+	*value = *(double*)(cs->CS + *ip);
 	*ip += sizeof(double);
 	return 0;
 }
 
-int ReadArg(char** CS_ptr, size_t* ip, Opcode opcode, double* value, int* reg_num) {
-	if ((opcode.code == PUSH) || (opcode.code == POP)) {
+int ReadArg(CS* cs, size_t* ip, Opcode opcode, double* value, int* reg_num) {
+	if ((opcode.code == PUSH) || (opcode.code == POP) || (opcode.code == JMP)) {
 		if (opcode.arg_type == REG) {
-			ReadRegArg(CS_ptr, ip, reg_num);
+			ReadRegArg(cs, ip, reg_num);
+		}
+		else if (opcode.arg_type == PUSH) {
+			ReadImmArg(cs, ip, value);
 		}
 		else {
-			ReadImmArg(CS_ptr, ip, value);
+			ReadImmArg(cs, ip, value);
 		}
 	}
 	return 0;
@@ -84,7 +81,6 @@ int ExecuteProgramm(CS* cs, FILE* out) {
 	SPU spu = {};
 	SPUCtor(&spu);
 	size_t line_iter = 0;
-	char*  cs_var    = cs->CS;
 
 	while (cs->ip < cs->capacity) {
 		SPUVerify(&spu);
@@ -92,14 +88,14 @@ int ExecuteProgramm(CS* cs, FILE* out) {
 		CSDump(cs);
 
 		Opcode opcode;
-		ReadCommand(&cs_var, &cs->ip, &opcode);
+		ReadCommand(cs, &cs->ip, &opcode);
 		
 		double value   = 0;
 		int    reg_num = 0;
-		ReadArg(&cs_var, &cs->ip, opcode, &value, &reg_num);
+		ReadArg(cs, &cs->ip, opcode, &value, &reg_num);
 
-		double a = 0;
-		double b = 0;
+		double a      = 0;
+		double b      = 0;
 		double in_var = 0;
 
 		Stack*  spu_var = nullptr;

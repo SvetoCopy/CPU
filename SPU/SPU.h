@@ -22,15 +22,17 @@ struct SPU {
 	LogFile logfile;
 };
 
-
-
 int SPUCtor(SPU* spu);
 int SPUDtor(SPU* spu);
 int SPUDump(SPU* spu);
 int SPUVerify(SPU* spu);
 
-int ReadCommand(char** CS_ptr, size_t* ip, Opcode* opcode);
+int ReadCommand(CS* cs, size_t* ip, Opcode* opcode);
+int ReadRegArg(CS* cs, size_t* ip, int* reg_num);
+int ReadImmArg(CS* cs, size_t* ip, double* value);
+int ReadArg(CS* cs, size_t* ip, Opcode opcode, double* value, int* reg_num);
+
 int ExecuteProgramm(CS* cs, FILE* out);
 
-int CSInsert(char** CS, FileInfo* file);
+int CSInsert(CS* cs, FileInfo* file);
 #endif

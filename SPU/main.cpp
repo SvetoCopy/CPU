@@ -8,7 +8,7 @@ int main()
 
 	CS cs = {};
 	CSCtor(&cs, file.buff_size);
-	CSInsert(&cs.CS, &file);
+	CSInsert(&cs, &file);
 	ExecuteProgramm(&cs, out);
 
 	CSDtor(&cs);

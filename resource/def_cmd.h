@@ -69,5 +69,8 @@ DEF_CMD(POP, 10,
 	}
 
 	)
+DEF_CMD(JMP, 11,
+	cs->ip = value;
+)
 #undef StackPop
 // DEF_CMD(COS, 10, ...)

@@ -48,16 +48,6 @@ int DetermineReg(char* str) {
 	else return ERROR;
 }
 
-// write_register(, Register reg)
-// void write_cmd_code(char** CS_ptr, Codes code)
-// {
-//		char* CS = *CS_ptr;
-//     *(int*)CS = code;
-//	   CS += sizeof(int);
-// }
-//
-
-// write_value(char** CS, double value)
 
 int AssemblyReg(char* str, int* type_code, int* reg_num) {
 	Opcode opcode_push = { PUSH, REG };
@@ -68,6 +58,10 @@ int AssemblyReg(char* str, int* type_code, int* reg_num) {
 	}
 	if (*type_code == POP) {
 		Opcode opcode = { POP, REG };
+		*type_code = *(int*)(&opcode);
+	}
+	if (*type_code == JMP) {
+		Opcode opcode = { JMP, REG };
 		*type_code = *(int*)(&opcode);
 	}
 
@@ -92,6 +86,10 @@ int AssemblyImm(char* str, int* type_code, double* value) {
 	}
 	if (*type_code == POP) {
 		Opcode opcode = { POP, IMM };
+		*type_code = *(int*)(&opcode);
+	}
+	if (*type_code == JMP) {
+		Opcode opcode = { JMP, IMM };
 		*type_code = *(int*)(&opcode);
 	}
 	return 0;
@@ -137,7 +135,7 @@ int AssemblyCommand(char* str, CS* cs) {
 	else return ERROR;
 
 	// write_cmd_code(CS, PUSH)
-	if ((type_code == PUSH) || (type_code == POP)) {
+	if ((type_code == PUSH) || (type_code == POP) || (type_code == JMP)) {
 		arg_type = AssemblyArg(str, &type_code, arg_count, &reg_num, &value);
 		if (arg_type == ERROR) return ERROR;
 	}
