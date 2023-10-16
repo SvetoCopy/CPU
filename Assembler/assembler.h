@@ -10,30 +10,22 @@
 #include "..\resource\RuzalLib\logger_.h"
 #include <math.h>
 #include "..\resource\utility.h"
+#include "..\resource\CS.h"
 
 const int COMMAND_SIZE = 10;
-const int ERROR = -1;
-enum CommandArg{
-	IMM = 0,
-	REG = 1,
-	EMPTY = 2,
-};
+                                      
+int CSInsert(int arg_type, CS* cs, double* value, int* reg_num, int* command);
+int CSInsertDoubleCode(CS* cs, double* code);
+int CSInsertIntCode(CS* cs, int* code);
 
-struct ASM {
-	char*   CS;
-	int     CS_size;
-	size_t  ip;                                                                             
-	LogFile logger;                                                                    
-};                                                                                
-// ???                                                                               
-int ASMCtor(ASM* asm_ptr, FileInfo* file);                                                 
-int ASMDtor(ASM* asm_ptr);                                                            
-int ASMVerify(ASM* asm_ptr);                                                         
-int ASMDump(ASM* asm_ptr);                                                       
-                                                                                   
-int CSInsert(int arg_type,char** CS, double* value, int* reg_num, int* type_code);                             
-int DetermineReg(char* str);                                                                     
-int AssemblyCommand(char* str, double* value, int* reg_num, int* type_code);                     
-int WriteByteCode(ASM* asm_ptr, const char* filename);
+int DetermineReg(char* str);   
+
+int AssemblyReg(char* str, int* type_code, int* reg_num);
+int AssemblyImm(char* str, int* type_code, double* value);
+int AssemblyArg(char* str, int* type_code, int arg_count, int* reg_num, double* value);
+int AssemblyCommand(char* str, CS* cs);
+int AssemblyProgram(CS* cs, FileInfo* file);
+
+int WriteByteCode(CS* cs, const char* filename);
 
 #endif // !DISASSEMBLER_DED

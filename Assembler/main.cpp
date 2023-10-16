@@ -3,7 +3,8 @@
 int main()
 {
 	FileInfo file = FileInfoCtor("expr.txt");
-	ASM as = {};
-	ASMCtor(&as, &file);
-	WriteByteCode(&as, "bytecode.txt");
+	CS cs = {};
+	CSCtor(&cs, (file.n_lines) * (sizeof(int) + sizeof(double)));
+	AssemblyProgram(&cs, &file);
+	WriteByteCode(&cs, "bytecode.txt");
 }

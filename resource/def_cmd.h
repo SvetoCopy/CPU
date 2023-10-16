@@ -1,8 +1,8 @@
 #define StackPop(a, b) if (StackPop(a, b) == -1) { fprintf(stderr, "Error in %d command", line_iter + 1); return -1;}
 
 DEF_CMD(PUSH, 1,
-	if (opcode.arg_type == 1) StackPush(&(spu.stack), value);
-	else if (opcode.arg_type == 2) {
+	if (opcode.arg_type == IMM) StackPush(&(spu.stack), value);
+	else if (opcode.arg_type == REG) {
 		spu_var = (Stack*)(&spu) + 1;
 		reg_var = (double*)(spu_var) + reg_num;
 		StackPush(&(spu.stack), *reg_var);
@@ -51,15 +51,22 @@ DEF_CMD(COS, 8,
 
 DEF_CMD(HLT, 9, 
 	return 0;
-	)
+)
 DEF_CMD(POP, 10,
-	if (opcode.arg_type == 1) {
+	if (opcode.arg_type == IMM) {
 		fprintf(stderr, "IMM in POP argument");
 		return -1;
 	}
 	spu_var = (Stack*)(&spu) + 1;
-	reg_var = (double*)(spu_var) + reg_num;
-	StackPop(&(spu.stack), reg_var);
+	reg_var = (Reg_t*)((Reg_t*)(spu_var) + reg_num);
+
+	if (reg_num < REG_COUNT) {
+		StackPop(&(spu.stack), reg_var);
+	}
+	else {
+		fprintf(stderr, "Undefined register");
+		return -1;
+	}
 
 	)
 #undef StackPop

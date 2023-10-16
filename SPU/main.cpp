@@ -1,12 +1,17 @@
 ﻿#include "SPU.h"
-#include "test.h"
+//#include "test.h"
 int main()
 {
-	FileInfo file = FileInfoCtor("expr.txt");
+	FileInfo file = FileInfoCtor("bytecode.txt");
 	FILE* out = {};
+	fopen_s(&out, "out.txt", "wb");
 
-	fopen_s(&out, "out.txt", "w");
-	ExecuteProgramm(&file, out);
+	CS cs = {};
+	CSCtor(&cs, file.buff_size);
+	CSInsert(&cs.CS, &file);
+	ExecuteProgramm(&cs, out);
+
+	CSDtor(&cs);
 	fclose(out);
 	FileInfoDtor(&file);
 
