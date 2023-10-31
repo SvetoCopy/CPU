@@ -1,4 +1,8 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include "SPU.h"
+
+
+
 
 int SPUDump(SPU* spu) {
 	StackDump(&(spu->stack));
@@ -6,19 +10,24 @@ int SPUDump(SPU* spu) {
 	printf("rbx = %f\n", spu->rbx);
 	printf("rcx = %f\n", spu->rcx);
 	printf("rdx = %f\n", spu->rdx);
+	
 	return 0;
 }
 
 int SPUVerify(SPU* spu) {
-	StackVerify(&(spu->stack));
+	StackVerify(&spu->stack);
+	StackVerify(&(spu->CallStack));
 	return 0;
 }
 
 
 int SPUCtor(SPU* spu) {
-	StackCtor(&spu->stack, 2, "SPU_Stack_Dump.log");
+	int stack_capacity = 2;
+	StackCtor(&spu->stack, stack_capacity, "SPU_Stack_Dump.log");
+	StackCtor(&spu->CallStack, stack_capacity, "SPU_Stack_Dump1.log");
 	LogFileCtor("SPU_Dump.log", &spu->logfile);
-
+	
+	spu->labels_count = 0;
 	spu->rax = 0;
 	spu->rbx = 0;
 	spu->rcx = 0;
@@ -29,6 +38,7 @@ int SPUCtor(SPU* spu) {
 
 int SPUDtor(SPU* spu) {
 	StackDtor(&(spu->stack));
+	StackDtor(&(spu->CallStack));
 	spu->rax = 0;
 	spu->rbx = 0;
 	spu->rcx = 0;
@@ -61,7 +71,8 @@ int ReadImmArg(CS* cs, size_t* ip, double* value) {
 }
 
 int ReadArg(CS* cs, size_t* ip, Opcode opcode, double* value, int* reg_num) {
-	if ((opcode.code == PUSH) || (opcode.code == POP) || (opcode.code == JMP)) {
+	if ((opcode.code == PUSH) || (opcode.code == POP) || (opcode.code == JMP)
+		|| ((opcode.code >= JA) && (opcode.code <= JNE)) || (opcode.code == CALL)) {
 		if (opcode.arg_type == REG) {
 			ReadRegArg(cs, ip, reg_num);
 		}
@@ -100,7 +111,6 @@ int ExecuteProgramm(CS* cs, FILE* out) {
 
 		Stack*  spu_var = nullptr;
 		double* reg_var = nullptr;
-
 
 		switch (opcode.code)
 		{

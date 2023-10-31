@@ -13,6 +13,8 @@ typedef double Reg_t;
 const int REG_COUNT = 4;
 
 
+
+
 struct SPU {
 	Stack   stack;
 	Reg_t   rax;
@@ -20,12 +22,16 @@ struct SPU {
 	Reg_t   rcx;
 	Reg_t   rdx;
 	LogFile logfile;
+	size_t labels_count;
+	Stack CallStack;
 };
 
 int SPUCtor(SPU* spu);
 int SPUDtor(SPU* spu);
 int SPUDump(SPU* spu);
 int SPUVerify(SPU* spu);
+
+
 
 int ReadCommand(CS* cs, size_t* ip, Opcode* opcode);
 int ReadRegArg(CS* cs, size_t* ip, int* reg_num);

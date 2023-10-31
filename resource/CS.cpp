@@ -45,16 +45,24 @@ int CSDump(CS* cs) {
 
 		iter += sizeof(int);
 
-		if ((opcode.code == PUSH) || (opcode.code == POP)) {
+		if ((opcode.code == PUSH) || (opcode.code == POP) || (opcode.code == JMP) 
+			|| ((opcode.code >= JA) && (opcode.code <= JNE)) || (opcode.code == CALL)) {
 
-			if (opcode.arg_type == 2) {
+			if (opcode.arg_type == REG) {
 
 				if (iter == cs->ip) printf(" [%d] ", *(int*)(cs_var));
 				else printf(" %d ", *(int*)(cs_var));
 				cs_var = (char*)((int*)cs_var + 1);
 				iter += sizeof(int);
 			}
-			else {
+			else if (opcode.arg_type == IMM) {
+
+				if (iter == cs->ip) printf(" [%lf] ", *(double*)(cs_var));
+				else printf(" %lf ", *(double*)(cs_var));
+				cs_var = (char*)((double*)cs_var + 1);
+				iter += sizeof(double);
+			}
+			else if (opcode.arg_type == LABEL) {
 
 				if (iter == cs->ip) printf(" [%lf] ", *(double*)(cs_var));
 				else printf(" %lf ", *(double*)(cs_var));
