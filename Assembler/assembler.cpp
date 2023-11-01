@@ -118,30 +118,31 @@ int CreateLabel(Assembler* ASM, char* name, double address) {
 }
 
 // Split to some func
-int AssemblyStr(Assembler* ASM, char* str, int* type_code, int* reg_num, double* value) {
+int AssemblyStr(Assembler* ASM, char* str, int* type_code, int* reg_num, double* value, size_t passage) {
 	char type_str[COMMAND_SIZE] = {};
 	char arg_name[COMMAND_SIZE] = {};
 
 	int  arg_count2 = sscanf(str, "%s %s", &type_str, &arg_name);
 	if (arg_count2 < 2) return ERROR;
+	
+	*reg_num = DetermineReg(arg_name);
+	if (*reg_num != ERROR) {
+		Opcode opcode = { *type_code, REG };
+		*type_code = *(int*)(&opcode);
 
-	int arg_name_len = strlen(arg_name);
-	if (arg_name[arg_name_len - 1] == ':') {
-		arg_name[arg_name_len - 1] = '\0';
+		*value = -1;
+		return REG;
+		
+	}
+	else {
+		if (passage == 1) return LABEL;
 		*value = DetermineLabel(ASM, arg_name);
 
 		Opcode opcode = { *type_code, IMM };
 		*type_code = *(int*)(&opcode);
-		return LABEL;
-	}
-	else {
-		Opcode opcode = { *type_code, REG };
-		*type_code = *(int*)(&opcode);
 
-		*reg_num = DetermineReg(arg_name);
-		*value = -1;
-		if (*reg_num == ERROR) return ERROR;
-		return REG;
+		if (*value == ERROR) return ERROR;
+		return LABEL;
 	}
 	
 }
@@ -152,9 +153,9 @@ int AssemblyImm(char* str, int* type_code, double* value) {
 	return IMM;
 }
 
-int AssemblyArg(Assembler* ASM, char* str, int* type_code, int arg_count, int* reg_num, double* value) {
+int AssemblyArg(Assembler* ASM, char* str, int* type_code, int arg_count, int* reg_num, double* value, size_t passage) {
 	if (arg_count == 1) {
-		return AssemblyStr(ASM, str, type_code, reg_num, value);
+		return AssemblyStr(ASM, str, type_code, reg_num, value, passage);
 	}
 	else {
 		return AssemblyImm(str, type_code, value);
@@ -192,7 +193,7 @@ int AssemblyCommand(char* str, Assembler* ASM, size_t passage) {
 	
 	if ((type_code == PUSH) || (type_code == POP) || (type_code == JMP) 
 		|| ((type_code >= JA) && (type_code <= JNE)) || (type_code == CALL)) {
-		arg_type = AssemblyArg(ASM, str, &type_code, arg_count, &reg_num, &value);
+		arg_type = AssemblyArg(ASM, str, &type_code, arg_count, &reg_num, &value, passage);
 		if (arg_type == ERROR) return ERROR;
 	}
 
