@@ -8,5 +8,5 @@ int main()
 	Assembler Asm = {};
 	AssemblerCtor(&Asm, &cs, &file);
 	AssemblyProgram(&Asm);
-	WriteByteCode(Asm.cs, "bytecode.txt");
+	CSOutputFile(Asm.cs, "..\\SPU\\bytecode.txt");
 }

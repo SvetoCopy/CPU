@@ -6,10 +6,14 @@ int main()
 	FILE* out = {};
 	fopen_s(&out, "out.txt", "wb");
 
-	CS cs = {};
+	CS  cs  = {};
+	SPU spu = {};
 	CSCtor(&cs, file.buff_size);
-	CSInsert(&cs, &file);
-	ExecuteProgramm(&cs, out);
+	SPUCtor(&spu);
+	CSInsertFile(&cs, &file);
+	DrawCircle(&spu);
+	GDPrint(&spu);
+	ExecuteProgramm(&spu, &cs, out);
 
 	CSDtor(&cs);
 	fclose(out);

@@ -1,5 +1,62 @@
 #include "CS.h"
 
+int CSOutputFile(CS* cs, const char* filename) {
+	FILE* res = {};
+	fopen_s(&res, filename, "wb");
+	fwrite(cs->CS, sizeof(char), cs->size, res);
+	fclose(res);
+	return 0;
+}
+
+int CSInsertIntCode(CS* cs, int* code) {
+	*(int*)(cs->CS + cs->size) = *code;
+	cs->size += sizeof(int);
+	return 0;
+}
+
+int CSInsertDoubleCode(CS* cs, double* code) {
+	*(double*)(cs->CS + cs->size) = *code;
+	cs->size += sizeof(double);
+	return 0;
+}
+
+int CSInsert(int arg_type, CS* cs, double* value, int* address_num, int* command) {
+	CSDump(cs);
+	CSInsertIntCode(cs, command);
+	CSDump(cs);
+	switch (arg_type) {
+	case IMM:
+		CSInsertDoubleCode(cs, value);
+		break;
+	case REG:
+		CSInsertIntCode(cs, address_num);
+		break;
+	case LABEL:
+		CSDump(cs);
+		CSInsertDoubleCode(cs, value);
+		CSDump(cs);
+		break;
+		// in future do insert double
+	case RAM_IMM:
+		CSDump(cs);
+		CSInsertIntCode(cs, address_num);
+		CSDump(cs);
+		break;
+
+	case RAM_REG:
+		CSDump(cs);
+		CSInsertIntCode(cs, address_num);
+		CSDump(cs);
+		break;
+	}
+	return 0;
+}
+
+int CSInsertFile(CS* cs, FileInfo* file) {
+	fread(cs->CS, sizeof(char), file->buff_size, file->input_file);
+	return 0;
+}
+
 static int SetError(unsigned* all_errors, int error) {
 	*all_errors |= (1 << error);
 	return 0;
@@ -22,6 +79,9 @@ int CSCtor(CS* cs, size_t capacity) {
 	cs->ip = 0;
 	return 0;
 }
+
+
+
 
 int CSDtor(CS* cs) {
 	free(cs->CS);
