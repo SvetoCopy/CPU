@@ -180,6 +180,31 @@ ArgType AssemblyArg(Assembler* asm_ptr, char* str, int* type_code, int arg_count
 	}
 }
 
+int RemoveComments(char* str) {
+	while (*str != '\0') {
+		if (*str == ';') {
+			*str = '\0';
+			return 0;
+		}
+		str++;
+	}
+}
+
+int VerifyCommand(char* str, int arg_count) {
+	char tmp1[COMMAND_SIZE] = {};
+	char tmp2[COMMAND_SIZE] = {};
+	int read_size = 0;
+	int n         = 0;
+	if (arg_count == 0) n = sscanf(str, "%s %n", &tmp1, &read_size);
+	if (arg_count == 1) n = sscanf(str, "%s %s %n", &tmp1, &tmp2, &read_size);
+	
+	while (*(str + read_size) != '\0') {
+		if (*(str + read_size) != ' ') return ERROR;
+		read_size++;
+	}
+	return 0;
+}
+
 int AssemblyCommand(char* str, Assembler* asm_ptr, size_t passage) {
 
 	assert(str != 0);
@@ -190,14 +215,19 @@ int AssemblyCommand(char* str, Assembler* asm_ptr, size_t passage) {
 	ArgType arg_type               = EMPTY;
 	char    type_str[COMMAND_SIZE] = {};
 
-	// %[]
-	// %n
+	RemoveComments(str);
+
 	int arg_count = sscanf(str, "%s %lf", &type_str, &value);
 	if (arg_count <= 0) return ERROR;
 	int type_str_len = strlen(type_str);
 
-	#define DEF_CMD(name, code, ...) else if (strcmp(type_str, #name) == 0){ type_code = code;}
+	
 	if (0) {}
+	#define DEF_CMD(cmd_name, cmd_code, cmd_args_num, ...)           \
+	else if (strcmp(type_str, #cmd_name) == 0){                      \
+		type_code = cmd_code;                                        \
+		if (VerifyCommand(str, cmd_args_num) == ERROR) return ERROR; \
+	}
 	#include "..\resource\def_cmd.h"
 	#undef DEF_CMD
 	else if (type_str[type_str_len - 1] == ':') {
@@ -208,13 +238,14 @@ int AssemblyCommand(char* str, Assembler* asm_ptr, size_t passage) {
 		return 0;
 	}
 	else return ERROR;
-	
-	if ((type_code == PUSH) || (type_code == POP) || (type_code == JMP)|| ((type_code >= JA) && (type_code <= JNE)) 
-	|| (type_code == CALL)) {
 
-		arg_type = AssemblyArg(asm_ptr, str, &type_code, arg_count, &address_num, &value, passage);
-		if (arg_type == UNDEFINED) return ERROR;
+	#define DEF_CMD(cmd_name, cmd_code, cmd_args_num, ...)                                            \
+	if ((type_code == cmd_code) && (cmd_args_num == 1)) {                                             \
+		arg_type = AssemblyArg(asm_ptr, str, &type_code, arg_count, &address_num, &value, passage);   \
+		if (arg_type == UNDEFINED) return ERROR;                                                      \
 	}
+	#include "../resource/def_cmd.h"
+	#undef DEF_CMD()
 
 	CSInsert(arg_type, asm_ptr->cs, &value, &address_num, &type_code);
 	return 0;

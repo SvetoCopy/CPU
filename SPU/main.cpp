@@ -12,8 +12,8 @@ int main()
 	SPUCtor(&spu);
 	CSInsertFile(&cs, &file);
 	DrawCircle(&spu);
-	GDPrint(&spu);
-	ExecuteProgramm(&spu, &cs, out);
+	VRamPrint(&spu);
+	ExecuteProgram(&spu, &cs, out);
 
 	CSDtor(&cs);
 	fclose(out);

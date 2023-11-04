@@ -11,27 +11,30 @@
 
 typedef double Reg_t;
 typedef double RAM_t;
-typedef char GD_t;
+typedef double Value_t;
+typedef char   VRam_t;
 
-const int GD_LEN = 625;
-const int GD_WIDTH = 25;
-const int REG_COUNT = 4;
-const int RAM_LEN = 10000;
+
+const int SIZEOF_COMMAND     = sizeof(int);
+const int SIZEOF_VALUE       = sizeof(Value_t);
+const int SIZEOF_ADDRESS_NUM = sizeof(int);
+const int VISIBLE_RAM_PART   = 3;
+const int VRam_LEN           = 625;
+const int VRam_WIDTH         = 25;
+const int REG_COUNT          = 4;
+const int RAM_LEN            = 10000;
 
 struct SPU {
 	Stack   stack;
-	Reg_t   rax;
-	Reg_t   rbx;
-	Reg_t   rcx;
-	Reg_t   rdx;
-	Reg_t   r8;
-	Reg_t   r9;
-	Reg_t   r10;
+
+	#define DEF_REG(name, ...) Reg_t name;
+	#include "..\resource\def_reg.h"
+	#undef DEF_REG
+
 	LogFile logfile;
-	size_t  labels_count;
 	Stack   CallStack;
-	RAM_t* RAM;
-	GD_t* GD;
+	RAM_t*  RAM;
+	VRam_t* VRam;
 };
 
 int SPUCtor(SPU* spu);
@@ -40,7 +43,7 @@ int SPUDump(SPU* spu);
 int SPUVerify(SPU* spu);
 
 int DrawCircle(SPU* spu);
-int GDPrint(SPU* spu);
-int ExecuteProgramm(SPU* spu, CS* cs, FILE* out);
+int VRamPrint(SPU* spu);
+int ExecuteProgram(SPU* spu, CS* cs, FILE* out);
 
 #endif

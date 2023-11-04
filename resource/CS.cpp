@@ -24,6 +24,7 @@ int CSInsert(int arg_type, CS* cs, double* value, int* address_num, int* command
 	CSDump(cs);
 	CSInsertIntCode(cs, command);
 	CSDump(cs);
+
 	switch (arg_type) {
 	case IMM:
 		CSInsertDoubleCode(cs, value);
@@ -79,8 +80,6 @@ int CSCtor(CS* cs, size_t capacity) {
 	cs->ip = 0;
 	return 0;
 }
-
-
 
 
 int CSDtor(CS* cs) {
