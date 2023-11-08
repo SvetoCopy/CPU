@@ -19,9 +19,8 @@ const int SIZEOF_COMMAND     = sizeof(int);
 const int SIZEOF_VALUE       = sizeof(Value_t);
 const int SIZEOF_ADDRESS_NUM = sizeof(int);
 const int VISIBLE_RAM_PART   = 3;
-// VRAM
-const int VRam_LEN           = 625;
-const int VRam_WIDTH         = 25;
+const int VRAM_LEN           = 625;
+const int VRAM_WIDTH         = 25;
 const int REG_COUNT          = 4;
 const int RAM_LEN            = 10000;
 
@@ -32,7 +31,7 @@ struct SPU {
 	#include "..\resource\def_reg.h"
 	#undef DEF_REG
 
-	// ip ??
+	size_t ip;
 	LogFile logfile;
 	Stack   CallStack;
 	RAM_t*  RAM;
@@ -45,6 +44,6 @@ int SPUVerify(SPU* spu);
 
 int VRamPrint(SPU* spu);
 // const char* cs
-int ExecuteProgram(SPU* spu, CS* cs, FILE* out);
+int ExecuteProgram(SPU* spu, CodeSeg* cs, FILE* out);
 
 #endif

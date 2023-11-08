@@ -10,20 +10,18 @@ enum Errors_CS {
 	CS_NULLPTR = 1
 };
 
-// code segment??
-struct CS {
-	char* CS;
+struct CodeSeg {
+	char* CodeSeg_ptr;
 	size_t capacity;
 	size_t size;
-	size_t ip;
 	LogFile logfile;
 };
 
-int CSCtor(CS* cs, size_t size);
-int CSDtor(CS* cs);
-int CSDump(CS* cs);
-int CSVerify(CS* cs);
+int CodeSegCtor(CodeSeg* code_seg, size_t size);
+int CodeSegDtor(CodeSeg* code_seg);
+int CodeSegDump(CodeSeg* code_seg, int ip);
+int CodeSegVerify(CodeSeg* code_seg);
 
-int CSInsertFile(CS* cs, FileInfo* file);
+int CodeSegInsertFile(CodeSeg* code_seg, FileInfo* file);
 
 #endif

@@ -6,16 +6,16 @@ int main()
 	FILE* out = {};
 	fopen_s(&out, "out.txt", "wb");
 
-	CS  cs  = {};
+	CodeSeg  cs  = {};
 	SPU spu = {};
-	CSCtor(&cs, file.buff_size);
+	CodeSegCtor(&cs, file.buff_size);
 	SPUCtor(&spu);
-	CSInsertFile(&cs, &file);
+	CodeSegInsertFile(&cs, &file);
 	//DrawCircle(&spu);
 	//VRamPrint(&spu);
 	ExecuteProgram(&spu, &cs, out);
 
-	CSDtor(&cs);
+	CodeSegDtor(&cs);
 	fclose(out);
 	FileInfoDtor(&file);
 

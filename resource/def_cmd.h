@@ -2,7 +2,7 @@
 // DEF_CMD(name, code, args_num, handle)
 
 DEF_CMD(PUSH, 1, 1,
-	Value_t * value = (Value_t*)ReadArg(spu, cs, &cs->ip, opcode.arg_type);
+	Value_t * value = (Value_t*)ReadArg(spu, cs, &spu->ip, opcode.arg_type);
 	StackPush(&(spu->stack), *value);
 )
 
@@ -66,39 +66,39 @@ DEF_CMD(POP, 10, 1,
 	StackPop(&(spu->stack), &ret_value);
 	
 	if (opcode.arg_type == REG) {
-		Reg_t* value = (Reg_t*)ReadArg(spu, cs, &cs->ip, opcode.arg_type);
+		Reg_t* value = (Reg_t*)ReadArg(spu, cs, &spu->ip, opcode.arg_type);
 		*value = ret_value;
 	}
 	if ((opcode.arg_type == RAM_IMM) || (opcode.arg_type == RAM_REG)) {
-		RAM_t* value = (RAM_t*)ReadArg(spu, cs, &cs->ip, opcode.arg_type);
+		RAM_t* value = (RAM_t*)ReadArg(spu, cs, &spu->ip, opcode.arg_type);
 		*value = (RAM_t)ret_value;
 	}
 )
 DEF_CMD(JMP, 11, 1,
-	Value_t* value = (Value_t*)ReadArg(spu, cs, &cs->ip, opcode.arg_type);
-	cs->ip = *value;
+	Value_t* value = (Value_t*)ReadArg(spu, cs, &spu->ip, opcode.arg_type);
+	spu->ip = *value;
 )
 
 #define DEF_JMP(name, cmp, num) DEF_CMD(name, num, 1,							        \
-							Value_t* value = (Value_t*)ReadArg(spu, cs, &cs->ip, opcode.arg_type); \
+							Value_t* value = (Value_t*)ReadArg(spu, cs, &spu->ip, opcode.arg_type); \
 							Value_t a = 0;												\
 							Value_t b = 0;												\
 							StackPop(&(spu->stack), &b);						        \
 							StackPop(&(spu->stack), &a);						        \
-							if (b cmp a) cs->ip = *value;)
+							if (b cmp a) spu->ip = *value;)
 #include "def_jmp.h"
 #undef DEF_JMP
 
 DEF_CMD(CALL, 18, 1,
-	Value_t* value = (Value_t*)ReadArg(spu, cs, &cs->ip, opcode.arg_type);
-	StackPush(&(spu->CallStack), cs->ip);
-	cs->ip = *value;
+	Value_t* value = (Value_t*)ReadArg(spu, cs, &spu->ip, opcode.arg_type);
+	StackPush(&(spu->CallStack), spu->ip);
+	spu->ip = *value;
 	)
 
 DEF_CMD(RET, 19, 0,
 	Value_t a = 0;
 	StackPop(&(spu->CallStack), &a);
-	cs->ip = a;
+	spu->ip = a;
 )
 DEF_CMD(ADD, 20, 0,
 	Value_t a = 0;

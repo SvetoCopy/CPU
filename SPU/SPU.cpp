@@ -2,8 +2,8 @@
 #include "SPU.h"
 
 int VRamPrint(SPU* spu) {
-	for (int i = 0; i < VRam_LEN; i++) {
-		if (i % VRam_WIDTH == 0) printf("\n");
+	for (int i = 0; i < VRAM_LEN; i++) {
+		if (i % VRAM_WIDTH == 0) printf("\n");
 		printf("%c", (char)spu->RAM[i]);
 	}
 	printf("\n");
@@ -37,7 +37,6 @@ int SPUVerify(SPU* spu) {
 	return 0;
 }
 
-
 int SPUCtor(SPU* spu) {
 	int stack_capacity = 2;
 	StackCtor(&spu->stack, stack_capacity, "SPU_Stack_Dump.log");
@@ -69,29 +68,29 @@ Value_t* GetRegisterPtr(SPU* spu, int reg_num) {
 	#include "..\resource\def_reg.h"
 }
 
-int ReadCommand(CS* cs, size_t* ip, Opcode* opcode) {
-	*opcode = *(Opcode*)(cs->CS + *ip);
+int ReadCommand(CodeSeg* cs, size_t* ip, Opcode* opcode) {
+	*opcode = *(Opcode*)(cs->CodeSeg_ptr + *ip);
 	*ip    += SIZEOF_COMMAND;
 	return 0;
 }
 
-Value_t* ReadRegArg(SPU* spu, CS* cs, size_t* ip) {
-	int      address_num = *(int*)(cs->CS + *ip);
+Value_t* ReadRegArg(SPU* spu, CodeSeg* cs, size_t* ip) {
+	int      address_num = *(int*)(cs->CodeSeg_ptr + *ip);
 	Value_t* value       = GetRegisterPtr(spu, address_num);
 	*ip += SIZEOF_ADDRESS_NUM;
 	
 	return value;
 }
 
-Value_t* ReadImmArg(CS* cs, size_t* ip) {
+Value_t* ReadImmArg(CodeSeg* cs, size_t* ip) {
 	double* value = nullptr;
-	value = (double*)(cs->CS + *ip);
+	value = (double*)(cs->CodeSeg_ptr + *ip);
 	*ip  += SIZEOF_VALUE;
 	return value;
 }
 
-RAM_t* ReadRamReg(SPU* spu, CS* cs, size_t* ip) {
-	int      address_num = *(int*)(cs->CS + *ip);
+RAM_t* ReadRamReg(SPU* spu, CodeSeg* cs, size_t* ip) {
+	int      address_num = *(int*)(cs->CodeSeg_ptr + *ip);
 	double   reg_value   = *GetRegisterPtr(spu, address_num);
 	RAM_t*   value         = &(spu->RAM[(int)reg_value]);
 	*ip += SIZEOF_ADDRESS_NUM;
@@ -99,15 +98,15 @@ RAM_t* ReadRamReg(SPU* spu, CS* cs, size_t* ip) {
 	return value;
 }
 
-RAM_t* ReadRamImm(SPU* spu, CS* cs, size_t* ip) {
-	int      address_num = *(int*)(cs->CS + *ip);
+RAM_t* ReadRamImm(SPU* spu, CodeSeg* cs, size_t* ip) {
+	int      address_num = *(int*)(cs->CodeSeg_ptr + *ip);
 	RAM_t* value       = &(spu->RAM[address_num]);
 	*ip += SIZEOF_ADDRESS_NUM;
 	
 	return value;
 }
 
-void* ReadArg(SPU* spu, CS* cs, size_t* ip, int arg_type) {
+void* ReadArg(SPU* spu, CodeSeg* cs, size_t* ip, int arg_type) {
 	if (arg_type == REG)     return ReadRegArg(spu, cs, ip);
 	if (arg_type == IMM)     return ReadImmArg(cs, ip);
 	if (arg_type == RAM_IMM) return ReadRamImm(spu, cs, ip);
@@ -117,15 +116,15 @@ void* ReadArg(SPU* spu, CS* cs, size_t* ip, int arg_type) {
 
 
 
-int ExecuteProgram(SPU* spu, CS* cs, FILE* out) {
+int ExecuteProgram(SPU* spu, CodeSeg* cs, FILE* out) {
 	size_t command_iter = 0;
 
-	while (cs->ip < cs->capacity) {
+	while (spu->ip < cs->capacity) {
 		SPUVerify(spu);
-		CSDump(cs);
+		CodeSegDump(cs, spu->ip);
 
 		Opcode opcode;
-		ReadCommand(cs, &cs->ip, &opcode);
+		ReadCommand(cs, &spu->ip, &opcode);
 		
 		switch (opcode.code)
 		{
@@ -143,7 +142,7 @@ int ExecuteProgram(SPU* spu, CS* cs, FILE* out) {
 		SPUDump(spu);
 	}
 	
-	CSDump(cs);
+	CodeSegDump(cs, spu->ip);
 	SPUDtor(spu);
 
 }
