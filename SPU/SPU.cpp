@@ -1,26 +1,10 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "SPU.h"
 
-// assembler
-int DrawCircle(SPU* spu) {
-	int height = VRam_LEN / VRam_WIDTH;
-	int width = VRam_WIDTH;
-	int center_x = width / 2 + 1;
-	int center_y = height / 2 + 1;
-	int radius = height - center_y;
-	for (int y = 0; y < height; y++) {
-		for (int x = 0; x < width; x++) {
-			if ((x + 1 - center_x) * (x + 1 - center_x) + (y + 1 - center_x) * (y + 1 - center_x) <= radius * radius) spu->VRam[y * width + x] = '*';
-			else spu->VRam[y * width + x] = ' ';
-		}
-	}
-	return 0;
-}
-
 int VRamPrint(SPU* spu) {
 	for (int i = 0; i < VRam_LEN; i++) {
 		if (i % VRam_WIDTH == 0) printf("\n");
-		printf("%c", spu->VRam[i]);
+		printf("%c", (char)spu->RAM[i]);
 	}
 	printf("\n");
 	return 0;
@@ -60,8 +44,6 @@ int SPUCtor(SPU* spu) {
 	StackCtor(&spu->CallStack, stack_capacity, "SPU_Stack_Dump1.log");
 	LogFileCtor("SPU_Dump.log", &spu->logfile);
 	spu->RAM = (RAM_t*)calloc(RAM_LEN, sizeof(RAM_t));
-
-	spu->VRam = (VRam_t*)calloc(VRam_LEN, sizeof(VRam_t));
 	spu->rax = 0;
 	spu->rbx = 0;
 	spu->rcx = 0;
@@ -74,7 +56,6 @@ int SPUDtor(SPU* spu) {
 	StackDtor(&spu->stack);
 	StackDtor(&spu->CallStack);
 	free(spu->RAM);
-	free(spu->VRam);
 	spu->rax = 0;
 	spu->rbx = 0;
 	spu->rcx = 0;
@@ -109,24 +90,24 @@ Value_t* ReadImmArg(CS* cs, size_t* ip) {
 	return value;
 }
 
-Value_t* ReadRamReg(SPU* spu, CS* cs, size_t* ip) {
+RAM_t* ReadRamReg(SPU* spu, CS* cs, size_t* ip) {
 	int      address_num = *(int*)(cs->CS + *ip);
 	double   reg_value   = *GetRegisterPtr(spu, address_num);
-	Value_t* value       = &(spu->RAM[(int)reg_value]);
+	RAM_t*   value         = &(spu->RAM[(int)reg_value]);
 	*ip += SIZEOF_ADDRESS_NUM;
 	
 	return value;
 }
 
-Value_t* ReadRamImm(SPU* spu, CS* cs, size_t* ip) {
+RAM_t* ReadRamImm(SPU* spu, CS* cs, size_t* ip) {
 	int      address_num = *(int*)(cs->CS + *ip);
-	Value_t* value       = &(spu->RAM[address_num]);
+	RAM_t* value       = &(spu->RAM[address_num]);
 	*ip += SIZEOF_ADDRESS_NUM;
 	
 	return value;
 }
 
-Value_t* ReadArg(SPU* spu, CS* cs, size_t* ip, int arg_type) {
+void* ReadArg(SPU* spu, CS* cs, size_t* ip, int arg_type) {
 	if (arg_type == REG)     return ReadRegArg(spu, cs, ip);
 	if (arg_type == IMM)     return ReadImmArg(cs, ip);
 	if (arg_type == RAM_IMM) return ReadRamImm(spu, cs, ip);
@@ -153,7 +134,7 @@ int ExecuteProgram(SPU* spu, CS* cs, FILE* out) {
 		#undef DEF_CMD
 		default:
 			SPUDump(spu);
-			fprintf(stderr, "Error in %d command", command_iter + 1);
+			fprintf(stderr, "Error in %z command", command_iter + 1);
 			return ERROR;
 			break;
 		}
@@ -161,6 +142,7 @@ int ExecuteProgram(SPU* spu, CS* cs, FILE* out) {
 		command_iter++;
 		SPUDump(spu);
 	}
+	
 	CSDump(cs);
 	SPUDtor(spu);
 

@@ -1,13 +1,66 @@
 #include "assembler.h"
 
+int CSOutputFile(Assembler* ASM, const char* filename) {
+	FILE* res = {};
+	fopen_s(&res, filename, "wb");
+	fwrite(ASM->CodeSeg, sizeof(char), ASM->CodeSeg_size, res);
+	fclose(res);
+	return 0;
+}
+
+int CSInsertIntCode(Assembler* ASM, int code) {
+	*(int*)(ASM->CodeSeg + ASM->CodeSeg_size) = code;
+	ASM->CodeSeg_size += sizeof(int);
+	return 0;
+}
+
+int CSInsertDoubleCode(Assembler* ASM, double code) {
+	*(double*)(ASM->CodeSeg + ASM->CodeSeg_size) = code;
+	ASM->CodeSeg_size += sizeof(double);
+	return 0;
+}
+
+int CSInsert(int arg_type, Assembler* ASM, double value, int address_num, int command) {
+	AssemblerDump(ASM);
+	CSInsertIntCode(ASM, command);
+	AssemblerDump(ASM);
+
+	switch (arg_type) {
+	case IMM:
+		CSInsertDoubleCode(ASM, value);
+		break;
+	case REG:
+		CSInsertIntCode(ASM, address_num);
+		break;
+	case LABEL:
+		AssemblerDump(ASM);
+		CSInsertDoubleCode(ASM, value);
+		AssemblerDump(ASM);
+		break;
+	case RAM_IMM:
+		AssemblerDump(ASM);
+		CSInsertIntCode(ASM, address_num);
+		AssemblerDump(ASM);
+		break;
+
+	case RAM_REG:
+		AssemblerDump(ASM);
+		CSInsertIntCode(ASM, address_num);
+		AssemblerDump(ASM);
+		break;
+	}
+	return 0;
+}
+
 
 int LabelCtor(Label* label, char* name, double address) {
-	label->name    = name;
+	label->name    = _strdup(name);
 	label->address = address;
 	return 0;
 }
 
 int LabelDtor(Label* label) {
+	free(label->name);
 	label->address = POISON;
 	label->name    = nullptr;
 	return 0;
@@ -19,84 +72,102 @@ int LabelDump(Label* label) {
 }
 
 int LabelVerify(Label* label) {
-	if (label == nullptr) fprintf(stderr, "Label is nullptr");
-	if (label->name == nullptr) fprintf(stderr, "Label name is nullptr");
-	if (label->address == POISON) fprintf(stderr, "Label address is unknown");
+	if (label          == nullptr) fprintf(stderr, "Label is nullptr");
+	if (label->name    == nullptr) fprintf(stderr, "Label name is nullptr");
+	if (label->address == POISON)  fprintf(stderr, "Label address is unknown");
 	return 0;
 }
 
-int AssemblerCtor(Assembler* asm_ptr, CS* cs, FileInfo* file) {
-	asm_ptr->cs     = cs;
-	asm_ptr->file   = file;
-	asm_ptr->labels = (Label*)calloc(INITIAL_COUNT_LABELS, sizeof(double) + sizeof(char*));
+int AssemblerCtor(Assembler* asm_ptr, char* CodeSeg, FileInfo* file) {
+	asm_ptr->CodeSeg = (char*)calloc(file->buff_size, sizeof(double) + sizeof(char*));;
+	asm_ptr->file    = file;
+	asm_ptr->labels  = (Label*)calloc(INITIAL_COUNT_LABELS, sizeof(double) + sizeof(char*));
 	return 0;
 }
 int AssemblerDtor(Assembler* asm_ptr) {
+	// memset()
 	for (int i = 0; i < asm_ptr->labels_count; i++) {
 		LabelDtor(&asm_ptr->labels[i]);
 	}
 	FileInfoDtor(asm_ptr->file);
-	CSDtor(asm_ptr->cs);
+	free(asm_ptr->CodeSeg);
+	asm_ptr->CodeSeg_size = 0;
 	return 0;
 }
+
 int AssemblerDump(Assembler* asm_ptr) {
 	for (int i = 0; i < asm_ptr->labels_count; i++) {
 		LabelDump(&asm_ptr->labels[i]);
 	}
-	CSDump(asm_ptr->cs);
+	size_t iter = 0;
+	char* cs_var = asm_ptr->CodeSeg;
+
+	printf("\n------------------------\n");
+	while (iter < asm_ptr->CodeSeg_size) {
+		Opcode opcode = *(Opcode*)((int*)(cs_var));
+		printf(" %d ", *(int*)(cs_var));
+
+		cs_var = (char*)((int*)(cs_var)+1);
+
+		iter += sizeof(int);
+
+		if ((opcode.code == PUSH) || (opcode.code == POP) || (opcode.code == JMP)
+			|| ((opcode.code >= JA) && (opcode.code <= JNE)) || (opcode.code == CALL)) {
+
+			if (opcode.arg_type == REG) {
+				printf(" %d ", *(int*)(cs_var));
+				cs_var = (char*)((int*)cs_var + 1);
+				iter += sizeof(int);
+			}
+			else if (opcode.arg_type == IMM) {
+				printf(" %lf ", *(double*)(cs_var));
+				cs_var = (char*)((double*)cs_var + 1);
+				iter += sizeof(double);
+			}
+			else if (opcode.arg_type == LABEL) {
+				printf(" %lf ", *(double*)(cs_var));
+				cs_var = (char*)((double*)cs_var + 1);
+				iter += sizeof(double);
+			}
+		}
+	}
+	printf("\n------------------------\n");
+	return 0;
 	return 0;
 }
 int AssemblerVerify(Assembler* asm_ptr) {
 	for (int i = 0; i < asm_ptr->labels_count; i++) {
 		LabelVerify(&asm_ptr->labels[i]);
 	}
-	CSVerify(asm_ptr->cs);
 	return 0;
 }
 
-int DetermineLabel(Assembler* asm_ptr, char* str) {
+// TODO: do address int
+ArgType DetermineLabel(Assembler* asm_ptr, char* str, double* address) {
 	for (int i = 0; i < asm_ptr->labels_count; i++) {
-		if (strcmp(str, asm_ptr->labels[i].name) == 0) return asm_ptr->labels[i].address;
+		if (strcmp(str, asm_ptr->labels[i].name) == 0) {
+			*address = asm_ptr->labels[i].address;
+			return LABEL;
+		}
 	}
-	return ERROR;
+	return UNDEFINED;
 }
 
-static char* ToUpperWord(const char* str) {
-	char* str_res = _strdup(str);
-	for (int i = 0; str[i] != '\0'; i++) {
-		str_res[i] = toupper(str[i]); 
+ArgType DetermineReg(char* str, int* reg_id) {
+
+	#define DEF_REG(reg_name, reg_code) \
+	if (_stricmp(#reg_name, str) == 0){ \
+		*reg_id = reg_code;             \
+		return REG;                     \
 	}
-	return str_res;
-}
-
-int DetermineReg(char* str) {
-
-#	define DEF_REG(reg_name, reg_code) if (strcmp(ToUpperWord(#reg_name), str) == 0) return reg_code;
 	#include "..\resource\def_reg.h"
-	else return ERROR;
+	return UNDEFINED;
 }
 
-int CreateLabel(Assembler* asm_ptr, char* name, double address) {
-	char* s = _strdup(name);
-	LabelCtor(&asm_ptr->labels[asm_ptr->labels_count], s, address);
+int CreateLabel(Assembler* asm_ptr, char* name, int address) {
+	LabelCtor(&asm_ptr->labels[asm_ptr->labels_count], name, address);
 	asm_ptr->labels_count++;
 	return 0;
-}
-
-static int StringToInt(char* str) {
-	int res = 0;
-	int len = strlen(str);
-	while (*str != '\0') {
-		int ASCII_ZERO = 48;
-		int ascii_num  = *str - ASCII_ZERO;
-		if (ascii_num < 10) {
-			res += ascii_num * (pow(10, len - 1));
-			len--;
-			str++;
-		}
-		else return ERROR;
-	}
-	return res;
 }
 
 ArgType DetermineRAM(char* str, int* address_num) {
@@ -104,13 +175,14 @@ ArgType DetermineRAM(char* str, int* address_num) {
 	int arg_count = sscanf(str, "[%[^]]", &word_in_brackets);
 	if (arg_count == 0) return UNDEFINED;
 
-	int reg = DetermineReg(word_in_brackets);
-	if (reg != ERROR) {
+	int reg = 0;
+	ArgType arg_type = DetermineReg(word_in_brackets, &reg);
+	if (arg_type != UNDEFINED) {
 		*address_num = reg;
 		return RAM_REG;
 	}
 
-	int imm = StringToInt(word_in_brackets);
+	int imm = atoi(word_in_brackets);
 	if (imm != ERROR) {
 		*address_num = imm;
 		return RAM_IMM;
@@ -119,66 +191,79 @@ ArgType DetermineRAM(char* str, int* address_num) {
 	return UNDEFINED;
 }
 
-ArgType AssemblyReg(int* type_code, double* value) {
-	Opcode opcode = { *type_code, REG };
-	*type_code = *(int*)(&opcode);
-	*value = -1;
+ArgType AssemblyRegCommand(Assembler* ASM, int command_code, int address_num) {
+	Opcode opcode = { command_code, REG };
+	command_code = *(int*)(&opcode);
+
+	CSInsertIntCode(ASM, command_code); 
+	CSInsertIntCode(ASM, address_num);
+
 	return REG;
 }
 
-ArgType AssemblyRAM(int* type_code, double* value, ArgType ram_arg_type) {
-	Opcode opcode = { *type_code, ram_arg_type };
-	*type_code = *(int*)(&opcode);
-	*value = -1;
+ArgType AssemblyRAM(Assembler* ASM, int command_code, int address_num, ArgType ram_arg_type) {
+	Opcode opcode = { command_code, ram_arg_type };
+	command_code = *(int*)(&opcode);
+
+	CSInsertIntCode(ASM, command_code);
+	CSInsertIntCode(ASM, address_num);
+
 	return ram_arg_type;
 }
-ArgType AssemblyLabel(int* type_code, int* address_num) {
-	
-	Opcode opcode = { *type_code, IMM };
-	*type_code = *(int*)(&opcode);
-	*address_num = -1;
+
+ArgType AssemblyLabel(Assembler* ASM, int command_code, double address) {
+	Opcode opcode = { command_code, IMM };
+	command_code = *(int*)(&opcode);
+
+	CSInsertIntCode(ASM, command_code);
+	CSInsertDoubleCode(ASM, address);
+
 	return LABEL;
 }
 
-ArgType AssemblyStr(Assembler* asm_ptr, char* str, int* type_code, int* address_num, double* value, size_t passage) {
+ArgType AssemblyStr(Assembler* ASM, char* str, int command_code, size_t passage) {
 	char type_str[COMMAND_SIZE] = {};
 	char arg_text[COMMAND_SIZE] = {};
 
-	int  arg_count2 = sscanf(str, "%s %s", &type_str, &arg_text);
-	if (arg_count2 < 2) return UNDEFINED;
+	int  read_count = sscanf(str, "%s %s", &type_str, &arg_text);
+	if (read_count < 2) return UNDEFINED;
+
+	int reg_num = 0;
+	ArgType arg_type = DetermineReg(arg_text, &reg_num);
+	if (arg_type != UNDEFINED) return AssemblyRegCommand(ASM, command_code, reg_num);
 	
-	*address_num = DetermineReg(arg_text);
-	if (*address_num != ERROR) {
-		return AssemblyReg(type_code, value);
-	}
 
-	ArgType ram_arg_type = DetermineRAM(arg_text, address_num);
-	if (ram_arg_type != UNDEFINED) {
-		return AssemblyRAM(type_code, value, ram_arg_type);
-	}
-
-	*value = DetermineLabel(asm_ptr, arg_text);
-	if (passage == 1) return LABEL;
-	if (*value != ERROR){
-		return AssemblyLabel(type_code, address_num);
-	}
+	int RAM_address = 0;
+	ArgType ram_arg_type = DetermineRAM(arg_text, &RAM_address);
+	if (ram_arg_type != UNDEFINED) return AssemblyRAM(ASM, command_code, RAM_address, ram_arg_type);
+	
+	double address_num = 0;
+	arg_type = DetermineLabel(ASM, arg_text, &address_num);
+	if ((arg_type != UNDEFINED) || (passage == 1)) return AssemblyLabel(ASM, command_code, address_num);
+	
 	return UNDEFINED;
 }
 
-ArgType AssemblyImm(char* str, int* type_code, double* value) {
-	Opcode opcode = { *type_code, IMM };
-	*type_code = *(int*)(&opcode);
+ArgType AssemblyImm(Assembler* ASM, char* str, int command_code) {
+	char   type_str[COMMAND_SIZE] = {};
+	double value                  = 0;
+
+	int read_count = sscanf(str, "%s %lf", &type_str, &value);
+
+	Opcode opcode = { command_code, IMM };
+	command_code = *(int*)(&opcode);
+
+	CSInsertIntCode(ASM, command_code);
+	CSInsertDoubleCode(ASM, value);
 	return IMM;
 }
 
-ArgType AssemblyArg(Assembler* asm_ptr, char* str, int* type_code, int arg_count, int* address_num, double* value, size_t passage) {
-	if (arg_count == 1) {
-		return AssemblyStr(asm_ptr, str, type_code, address_num, value, passage);
-	}
-	else {
-		return AssemblyImm(str, type_code, value);
-	}
+// arg_str cmd_code is_imm
+ArgType AssemblyArg(Assembler* ASM, char* str, int command_code, bool arg_is_imm, size_t passage) {
+	if (arg_is_imm == false) return AssemblyStr(ASM, str, command_code, passage);
+	else return AssemblyImm(ASM, str, command_code);
 }
+
 
 int RemoveComments(char* str) {
 	while (*str != '\0') {
@@ -190,88 +275,111 @@ int RemoveComments(char* str) {
 	}
 }
 
-int VerifyCommand(char* str, int arg_count) {
+int VerifyCommand(char* str, int args_count) {
 	char tmp1[COMMAND_SIZE] = {};
 	char tmp2[COMMAND_SIZE] = {};
-	int read_size = 0;
-	int n         = 0;
-	if (arg_count == 0) n = sscanf(str, "%s %n", &tmp1, &read_size);
-	if (arg_count == 1) n = sscanf(str, "%s %s %n", &tmp1, &tmp2, &read_size);
-	
-	while (*(str + read_size) != '\0') {
+	int  read_size          = 0;
+
+	if (args_count == 0) sscanf(str, "%s %n", &tmp1, &read_size);
+	if (args_count == 1) sscanf(str, "%s %s %n", &tmp1, &tmp2, &read_size);
+	else sscanf(str, "%s %n", &tmp1, &read_size);
+
+	while (str[read_size] != '\0') {
 		if (*(str + read_size) != ' ') return ERROR;
 		read_size++;
 	}
+
+	return 0;
+}
+
+ParseStatus ParseCommand(char* str, char* buffer, int* command_code) {
+	if (0) {}
+	#define DEF_CMD(cmd_name, cmd_code, cmd_args_num, ...)              \
+	else if (strcmp(buffer, #cmd_name) == 0){                           \
+		*command_code = cmd_code;                                        \
+		if (VerifyCommand(str, cmd_args_num) == ERROR) return PARSE_ERROR;    \
+		return FOUND;                                                      \
+	}
+	#include "..\resource\def_cmd.h"
+	#undef DEF_CMD
+	return UNFOUND;
+}
+
+ParseStatus ParseLabel(Assembler* asm_ptr, char* buffer, int passage) {
+	int buffer_len = strlen(buffer);
+	if (buffer[buffer_len - 1] == ':') {
+		if (passage == 1) {
+			buffer[buffer_len - 1] = '\0';
+			CreateLabel(asm_ptr, buffer, asm_ptr->CodeSeg_size);
+		}
+		return FOUND;
+	}
+	return UNFOUND;
+}
+
+ArgType AssemblyCmdWithArgs(Assembler* ASM, char* str, int command_code, bool arg_is_imm, size_t passage) {
+	ArgType arg_type = EMPTY;
+	#define DEF_CMD(cmd_name, cmd_code, cmd_args_num, ...)                                            \
+	if ((command_code == cmd_code) && (cmd_args_num == 1)) {                             \
+		arg_type = AssemblyArg(ASM, str, command_code, arg_is_imm, passage);   \
+		if (arg_type == UNDEFINED) return UNDEFINED;     \
+		return arg_type; \
+	}
+	#include "../resource/def_cmd.h"
+	#undef DEF_CMD()
+	return EMPTY;
+}
+
+int AssemblyCmdWOArgs(Assembler* ASM, int command_code) {
+	CSInsertIntCode(ASM, command_code);
 	return 0;
 }
 
 int AssemblyCommand(char* str, Assembler* asm_ptr, size_t passage) {
-
 	assert(str != 0);
 
 	double  value                  = 0;
 	int     address_num            = 0;
-	int     type_code              = 0;
-	ArgType arg_type               = EMPTY;
-	char    type_str[COMMAND_SIZE] = {};
+	int     command_code           = 0;
+	char    buffer[COMMAND_SIZE]   = {};
 
 	RemoveComments(str);
-
-	int arg_count = sscanf(str, "%s %lf", &type_str, &value);
+	if (strcmp(str, "") == 0 || strcmp(str, "\n") == 0) return 0;
+	int arg_count = sscanf(str, "%s %lf", &buffer, &value);
 	if (arg_count <= 0) return ERROR;
-	int type_str_len = strlen(type_str);
-
 	
-	if (0) {}
-	#define DEF_CMD(cmd_name, cmd_code, cmd_args_num, ...)           \
-	else if (strcmp(type_str, #cmd_name) == 0){                      \
-		type_code = cmd_code;                                        \
-		if (VerifyCommand(str, cmd_args_num) == ERROR) return ERROR; \
-	}
-	#include "..\resource\def_cmd.h"
-	#undef DEF_CMD
-	else if (type_str[type_str_len - 1] == ':') {
-		if (passage == 1) {
-			type_str[type_str_len - 1] = '\0';
-			CreateLabel(asm_ptr, type_str, asm_ptr->cs->size);
-		}
-		return 0;
-	}
-	else return ERROR;
 
-	#define DEF_CMD(cmd_name, cmd_code, cmd_args_num, ...)                                            \
-	if ((type_code == cmd_code) && (cmd_args_num == 1)) {                                             \
-		arg_type = AssemblyArg(asm_ptr, str, &type_code, arg_count, &address_num, &value, passage);   \
-		if (arg_type == UNDEFINED) return ERROR;                                                      \
+	bool arg_is_imm = (arg_count == 2);
+	ParseStatus status = ParseCommand(str, buffer, &command_code);
+	if (status == UNFOUND) {
+		status = ParseLabel(asm_ptr, buffer, passage);
+		if (status == FOUND) return 0;
+		else return ERROR;
 	}
-	#include "../resource/def_cmd.h"
-	#undef DEF_CMD()
 
-	CSInsert(arg_type, asm_ptr->cs, &value, &address_num, &type_code);
+	ArgType arg_type = AssemblyCmdWithArgs(asm_ptr, str, command_code, arg_is_imm, passage);
+	if (arg_type == UNDEFINED) return ERROR;
+	if (arg_type == EMPTY) AssemblyCmdWOArgs(asm_ptr, command_code);
 	return 0;
 }
 
-int AssemblyProgram(Assembler* asm_ptr){
-	// first passage( for labels ) 
+int AssemblyAllCommands(Assembler* asm_ptr, int passage) {
 	for (int i = 0; i < asm_ptr->file->n_lines; i++) {
 		AssemblerDump(asm_ptr);
-		if (strcmp(asm_ptr->file->text[i], "") == 0 || strcmp(asm_ptr->file->text[i], "\n") == 0 ) continue;
-		int n = AssemblyCommand(asm_ptr->file->text[i], asm_ptr, 1);
-		if (n == ERROR) {
+		int ret_value = AssemblyCommand(asm_ptr->file->text[i], asm_ptr, 1);
+		if (ret_value == ERROR) {
 			fprintf(stderr, "Unknown command in %d line", i + 1);
 			return ERROR;
 		}
 	}
-	asm_ptr->cs->size = 0;
-	// second passage 
-	for (int i = 0; i < asm_ptr->file->n_lines; i++) {
-		AssemblerDump(asm_ptr);
-		if (strcmp(asm_ptr->file->text[i], "") == 0 || strcmp(asm_ptr->file->text[i], "\n") == 0) continue;
-		int n = AssemblyCommand(asm_ptr->file->text[i], asm_ptr, 2);
-		if (n == ERROR) {
-			fprintf(stderr, "Unknown command in %d line", i + 1);
-			return ERROR;
-		}
-	}
+}
+
+int AssemblyProgram(Assembler* asm_ptr) {
+
+	AssemblyAllCommands(asm_ptr, 1);
+	asm_ptr->CodeSeg_size = 0;
+	AssemblyAllCommands(asm_ptr, 2);
+
 	AssemblerDump(asm_ptr);
+	return 0;
 }

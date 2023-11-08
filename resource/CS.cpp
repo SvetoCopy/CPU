@@ -1,57 +1,5 @@
 #include "CS.h"
 
-int CSOutputFile(CS* cs, const char* filename) {
-	FILE* res = {};
-	fopen_s(&res, filename, "wb");
-	fwrite(cs->CS, sizeof(char), cs->size, res);
-	fclose(res);
-	return 0;
-}
-
-int CSInsertIntCode(CS* cs, int* code) {
-	*(int*)(cs->CS + cs->size) = *code;
-	cs->size += sizeof(int);
-	return 0;
-}
-
-int CSInsertDoubleCode(CS* cs, double* code) {
-	*(double*)(cs->CS + cs->size) = *code;
-	cs->size += sizeof(double);
-	return 0;
-}
-
-int CSInsert(int arg_type, CS* cs, double* value, int* address_num, int* command) {
-	CSDump(cs);
-	CSInsertIntCode(cs, command);
-	CSDump(cs);
-
-	switch (arg_type) {
-	case IMM:
-		CSInsertDoubleCode(cs, value);
-		break;
-	case REG:
-		CSInsertIntCode(cs, address_num);
-		break;
-	case LABEL:
-		CSDump(cs);
-		CSInsertDoubleCode(cs, value);
-		CSDump(cs);
-		break;
-		// in future do insert double
-	case RAM_IMM:
-		CSDump(cs);
-		CSInsertIntCode(cs, address_num);
-		CSDump(cs);
-		break;
-
-	case RAM_REG:
-		CSDump(cs);
-		CSInsertIntCode(cs, address_num);
-		CSDump(cs);
-		break;
-	}
-	return 0;
-}
 
 int CSInsertFile(CS* cs, FileInfo* file) {
 	fread(cs->CS, sizeof(char), file->buff_size, file->input_file);
@@ -65,9 +13,9 @@ static int SetError(unsigned* all_errors, int error) {
 
 static int CSPrintErrorInfo(unsigned error, CS* cs) {
 #define check(error_code) ( error & (1 << error_code) ) == (1 << error_code)
-	FILE* f = (cs->logfile).file;
-	if (check(CS_RANGE_ERROR)) fprintf(f, "\nip > CS size\n");
-	if (check(CS_NULLPTR))  fprintf(f, "\nCS is null\n");
+	FILE* file = cs->logfile.file;
+	if (check(CS_RANGE_ERROR)) fprintf(file, "\nip > CS size\n");
+	if (check(CS_NULLPTR))  fprintf(file, "\nCS is null\n");
 #undef check
 	return 0;
 };

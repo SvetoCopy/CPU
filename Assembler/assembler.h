@@ -11,12 +11,17 @@
 #include "..\resource\RuzalLib\logger_.h"
 #include <math.h>
 #include "..\resource\utility.h"
-#include "..\resource\CS.h"
 
 const double POISON = -1;
 const int COMMAND_SIZE = 100;
 const int INITIAL_COUNT_LABELS = 100;
 const int MAX_RAM_LEN = 1000;
+
+enum ParseStatus {
+    PARSE_ERROR = -1,
+    UNFOUND = 0,
+    FOUND   = 1
+};
 
 struct Label {
     char* name;
@@ -24,14 +29,19 @@ struct Label {
 };
 
 struct Assembler {
-    CS* cs;
+    char*     CodeSeg;
+    size_t    CodeSeg_size;
     FileInfo* file;
-    Label* labels;
-    int labels_count;
+    Label*    labels;
+    int       labels_count;
+    LogFile   logfile;
 };
 
-int AssemblerCtor(Assembler* ASM, CS* cs, FileInfo* file);
+int AssemblerCtor(Assembler* ASM, char* CodeSeg, FileInfo* file);
 int AssemblerDtor(Assembler* ASM);
+
+int CSOutputFile(Assembler* ASM, const char* filename);
+// int AssemblerInsertIntCode()
 int AssemblerDump(Assembler* ASM);
 int AssemblerVerify(Assembler* ASM);
 

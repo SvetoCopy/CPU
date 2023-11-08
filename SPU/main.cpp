@@ -11,8 +11,8 @@ int main()
 	CSCtor(&cs, file.buff_size);
 	SPUCtor(&spu);
 	CSInsertFile(&cs, &file);
-	DrawCircle(&spu);
-	VRamPrint(&spu);
+	//DrawCircle(&spu);
+	//VRamPrint(&spu);
 	ExecuteProgram(&spu, &cs, out);
 
 	CSDtor(&cs);
