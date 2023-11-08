@@ -7,5 +7,5 @@ int main()
 	Assembler Asm = {};
 	AssemblerCtor(&Asm, cs, &file);
 	AssemblyProgram(&Asm);
-	CSOutputFile(&Asm, "C:\\Users\\Рузаль\\Desktop\\CPU\\SPU\\bytecode.txt");
+	AssemblerOutputFile(&Asm, "C:\\Users\\Рузаль\\Desktop\\CPU\\SPU\\bytecode.txt");
 }

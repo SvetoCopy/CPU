@@ -1,6 +1,6 @@
 #include "assembler.h"
 
-int CSOutputFile(Assembler* ASM, const char* filename) {
+int AssemblerOutputFile(Assembler* ASM, const char* filename) {
 	FILE* res = {};
 	fopen_s(&res, filename, "wb");
 	fwrite(ASM->CodeSeg, sizeof(char), ASM->CodeSeg_size, res);
@@ -8,47 +8,15 @@ int CSOutputFile(Assembler* ASM, const char* filename) {
 	return 0;
 }
 
-int CSInsertIntCode(Assembler* ASM, int code) {
+int AssemblerInsertIntCode(Assembler* ASM, int code) {
 	*(int*)(ASM->CodeSeg + ASM->CodeSeg_size) = code;
 	ASM->CodeSeg_size += sizeof(int);
 	return 0;
 }
 
-int CSInsertDoubleCode(Assembler* ASM, double code) {
+int AssemblerInsertDoubleCode(Assembler* ASM, double code) {
 	*(double*)(ASM->CodeSeg + ASM->CodeSeg_size) = code;
 	ASM->CodeSeg_size += sizeof(double);
-	return 0;
-}
-
-int CSInsert(int arg_type, Assembler* ASM, double value, int address_num, int command) {
-	AssemblerDump(ASM);
-	CSInsertIntCode(ASM, command);
-	AssemblerDump(ASM);
-
-	switch (arg_type) {
-	case IMM:
-		CSInsertDoubleCode(ASM, value);
-		break;
-	case REG:
-		CSInsertIntCode(ASM, address_num);
-		break;
-	case LABEL:
-		AssemblerDump(ASM);
-		CSInsertDoubleCode(ASM, value);
-		AssemblerDump(ASM);
-		break;
-	case RAM_IMM:
-		AssemblerDump(ASM);
-		CSInsertIntCode(ASM, address_num);
-		AssemblerDump(ASM);
-		break;
-
-	case RAM_REG:
-		AssemblerDump(ASM);
-		CSInsertIntCode(ASM, address_num);
-		AssemblerDump(ASM);
-		break;
-	}
 	return 0;
 }
 
@@ -195,8 +163,8 @@ ArgType AssemblyRegCommand(Assembler* ASM, int command_code, int address_num) {
 	Opcode opcode = { command_code, REG };
 	command_code = *(int*)(&opcode);
 
-	CSInsertIntCode(ASM, command_code); 
-	CSInsertIntCode(ASM, address_num);
+	AssemblerInsertIntCode(ASM, command_code); 
+	AssemblerInsertIntCode(ASM, address_num);
 
 	return REG;
 }
@@ -205,8 +173,8 @@ ArgType AssemblyRAM(Assembler* ASM, int command_code, int address_num, ArgType r
 	Opcode opcode = { command_code, ram_arg_type };
 	command_code = *(int*)(&opcode);
 
-	CSInsertIntCode(ASM, command_code);
-	CSInsertIntCode(ASM, address_num);
+	AssemblerInsertIntCode(ASM, command_code);
+	AssemblerInsertIntCode(ASM, address_num);
 
 	return ram_arg_type;
 }
@@ -215,8 +183,8 @@ ArgType AssemblyLabel(Assembler* ASM, int command_code, double address) {
 	Opcode opcode = { command_code, IMM };
 	command_code = *(int*)(&opcode);
 
-	CSInsertIntCode(ASM, command_code);
-	CSInsertDoubleCode(ASM, address);
+	AssemblerInsertIntCode(ASM, command_code);
+	AssemblerInsertDoubleCode(ASM, address);
 
 	return LABEL;
 }
@@ -253,8 +221,8 @@ ArgType AssemblyImm(Assembler* ASM, char* str, int command_code) {
 	Opcode opcode = { command_code, IMM };
 	command_code = *(int*)(&opcode);
 
-	CSInsertIntCode(ASM, command_code);
-	CSInsertDoubleCode(ASM, value);
+	AssemblerInsertIntCode(ASM, command_code);
+	AssemblerInsertDoubleCode(ASM, value);
 	return IMM;
 }
 
@@ -331,7 +299,7 @@ ArgType AssemblyCmdWithArgs(Assembler* ASM, char* str, int command_code, bool ar
 }
 
 int AssemblyCmdWOArgs(Assembler* ASM, int command_code) {
-	CSInsertIntCode(ASM, command_code);
+	AssemblerInsertIntCode(ASM, command_code);
 	return 0;
 }
 

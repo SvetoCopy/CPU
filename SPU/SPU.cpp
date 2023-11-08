@@ -133,7 +133,7 @@ int ExecuteProgram(SPU* spu, CodeSeg* cs, FILE* out) {
 		#undef DEF_CMD
 		default:
 			SPUDump(spu);
-			fprintf(stderr, "Error in %z command", command_iter + 1);
+			fprintf(stderr, "Error in %zu command", command_iter + 1);
 			return ERROR;
 			break;
 		}

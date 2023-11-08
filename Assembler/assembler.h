@@ -40,8 +40,7 @@ struct Assembler {
 int AssemblerCtor(Assembler* ASM, char* CodeSeg, FileInfo* file);
 int AssemblerDtor(Assembler* ASM);
 
-int CSOutputFile(Assembler* ASM, const char* filename);
-// int AssemblerInsertIntCode()
+int AssemblerOutputFile(Assembler* ASM, const char* filename);
 int AssemblerDump(Assembler* ASM);
 int AssemblerVerify(Assembler* ASM);
 
