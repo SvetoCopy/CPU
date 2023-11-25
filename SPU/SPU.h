@@ -9,12 +9,9 @@
 #include "..\resource\CS.h"
 #include <math.h>
 
-typedef double Value_t;
-typedef Value_t Reg_t;
-typedef Value_t RAM_t;
-// typedef char   VRam_t;
+typedef double  Value_t;
 
-
+const int SPU_ERROR          = -1;
 const int SIZEOF_COMMAND     = sizeof(int);
 const int SIZEOF_VALUE       = sizeof(Value_t);
 const int SIZEOF_ADDRESS_NUM = sizeof(int);
@@ -25,16 +22,15 @@ const int REG_COUNT          = 4;
 const int RAM_LEN            = 10000;
 
 struct SPU {
-	Stack   stack;
-
 	#define DEF_REG(name, ...) Reg_t name;
 	#include "..\resource\def_reg.h"
 	#undef DEF_REG
 
-	size_t ip;
+	Stack   stack;
+	size_t  ip;
 	LogFile logfile;
 	Stack   CallStack;
-	RAM_t*  RAM;
+	Value_t*  RAM;
 };
 
 int SPUCtor(SPU* spu);
@@ -43,7 +39,6 @@ int SPUDump(SPU* spu);
 int SPUVerify(SPU* spu);
 
 int VRamPrint(SPU* spu);
-// const char* cs
 int ExecuteProgram(SPU* spu, CodeSeg* cs, FILE* out);
 
 #endif

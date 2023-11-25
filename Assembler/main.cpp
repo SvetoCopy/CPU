@@ -8,4 +8,5 @@ int main()
 	AssemblerCtor(&Asm, cs, &file);
 	AssemblyProgram(&Asm);
 	AssemblerOutputFile(&Asm, "C:\\Users\\Рузаль\\Desktop\\CPU\\SPU\\bytecode.txt");
+	return 0;
 }

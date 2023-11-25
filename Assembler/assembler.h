@@ -19,6 +19,7 @@ const int MAX_RAM_LEN = 1000;
 
 enum ParseStatus {
     PARSE_ERROR = -1,
+    // CMD_UNFOUND
     UNFOUND = 0,
     FOUND   = 1
 };
@@ -29,6 +30,8 @@ struct Label {
 };
 
 struct Assembler {
+    // code_seg;
+    // code_seg_size;
     char*     CodeSeg;
     size_t    CodeSeg_size;
     FileInfo* file;
