@@ -1,37 +1,138 @@
-<h1>CPU, Assembler, Disassembler by Ruzal</h1>
-<h2>Commands Example</h2>
+<h1>CPU, Assembler by Ruzal</h1>
 
-| Command | Description                                        | Arg Types     |
-|---------|----------------------------------------------------|---------------|
-| PUSH    | Pushes a value onto the stack                      | IMM, REG, RAM |
-| POP     | Popes a value from the stack                       | IMM, REG, RAM |
-| DIV     | Take two values from the stack divides             |       -       |
-| SUB     | Take two values from the stack subtracts           |       -       |
-| OUT     | Print a value from the stack head                  |       -       |
-| IN      | Pushes a value to the stack                        |       -       |
-| JMP     | Jump to the any part of code                       | IMM, REG, RAM |
-| CALL    | Pop a value from the stack and  jump to this value |       -       |
+<h2>Принцип работы Assembler</h2>
+<p>На вход поступает код в файле expr.txt. Например:</p>
 
-Other commands listed in def_cmd.h
-
-<h2>Register Agreement</h2>
-
-| RAX | Return register |
-|-----|-----------------|
-| RBX | first arg       |
-| RCX | second arg      |
-| RDX | third arg       |
-| R8  | calee saved     |
-| R9  | calee saved     |
-| R10 | calee saved     |
-
-<h2>Video RAM</h2>
-<p>Initially, RAM stores double. But for Video RAM these doubles are perceived as ASKII codes</p>
-<h3>Example</h3>
-
+``` asm
+DISCR:
+    POP R10
+    POP R9
+    POP R8
+    PUSH R9
+    PUSH R9
+    MUL
+    PUSH 4
+    PUSH R8
+    PUSH R10
+    MUL
+    MUL
+    SUB
+    POP RAX
+    RET
 ```
-RAM[0] = 42.000
-PrintVideoRAM():
-  char c = 42; 
-  pritnf("%c", c); 
+<p>Полный список команд будет находится ниже.</p>
+<p>Assembler представляет каждую команду и ее аргумент (при наличии) в уникальном байт-коде. Код команды зависит от типа аргумента</p>
+<h3>Как строится байт код команды?</h3>
+
+| ТИП АРГУМЕНТА | ТИП КОМАНДЫ |
+|---------------|-------------|
+|            xx | yyyyyy      |
+
+Биты аргумента определяются по следующим правилам:
+
+| Тип аргумента | Байт-код аргумента |
+|---------------|--------------------|
+| IMM           | 00                 |
+| REG           | 01                 |
+| [IMM]         | 10                 |
+| [RAM]         | 11                 |
+
+Например:
+| Команда | Аргумент | Байт-код команды |
+|---------|----------|------------------|
+|    PUSH | 18       | 00000001         |
+|    PUSH | RAX      | 01000001         |
+|    PUSH | [18]     | 10000001         |
+|    PUSH | [RAX]    | 11000001         |
+
+<p>Соотвественно весь код преобразуется в байт-код и записывается в файл bytecode.txt</p>
+
+<h2>Принцип работы CPU</h2>
+<p>После получения байт-кода из Assembler, CPU начинает выполнять каждую команду поочередно</p>
+<p>Далее будут перечислены все команды и их описание</p>
+<h2>Команды</h2>
+
+| Команда | Код команды | Описание                                                                                                                                    | Возможный тип аргумента |
+|---------|-------------|---------------------------------------------------------------------------------------------------------------------------------------------|-------------------------|
+| PUSH    | 1           | Выполняет команду PUSH в STACK                                                                                                              | IMM, REG, RAM           |
+| POP     | 10          | Выполняет команду POP из STACK                                                                                                              | IMM, REG, RAM           |
+| DIV     | 2           | Достает два последних значения из STACK, делит их, результат кладет в STACK                                                                 | -                       |
+| MUL     | 6           | Достает два последних значения из STACK, умножает  их, результат кладет в STACK                                                             | -                       |
+| POW     | 21          | Достает два последних значения из STACK, возводит  первого в степень на значение второго,  результат кладет в STACK                         | -                       |
+| SIN     | 7           | Достает последнее значение из STACK, выполняет от него sin, результат кладет в STACK                                                        | -                       |
+| COS     | 8           | Достает последнее значение из STACK, выполняет от него cos, результат кладет в STACK                                                        | -                       |
+| ADD     | 20          | Достает два последних значения из STACK, складывает  их, результат кладет в STACK                                                           | -                       |
+| SUB     | 3           | Достает два последних значения из STACK, вычитает  их, результат кладет в STACK                                                             | -                       |
+| OUT     | 4           | Выводит в консоль (или в файл output.txt) значение на верхушке STACK                                                                        | -                       |
+| IN      | 5           | Принимает значение из консоли и кладет в STACK                                                                                              | -                       |
+| JMP     | 11          | Переходит на кусок кода, находящийся по адресу,  записанного в аргументе                                                                    | IMM, REG, RAM           |
+| JA      | 12          | Достает два последних значения из STACK, проверяет больше ли первое, чем второе, если верно, то  выполняет JMP по адресу                    | IMM, REG, RAM           |
+| JAE     | 13          | Достает два последних значения из STACK, проверяет больше или равно ли второе, чем первое, если верно, то выполняет JMP по адресу           | IMM, REG, RAM           |
+| JB      | 14          | Достает два последних значения из STACK, проверяет меньше ли первое, чем второе, если верно, то  выполняет JMP по адресу                    | IMM, REG, RAM           |
+| JBE     | 15          | Достает два последних значения из STACK, проверяет меньше или равно ли второе, чем первое, если верно, то выполняет JMP по адресу           | IMM, REG, RAM           |
+| JE      | 16          | Достает два последних значения из STACK, проверяет равно ли первое второму, если верно, то  выполняет JMP по адресу                         | IMM, REG, RAM           |
+| JNE     | 17          | Достает два последних значения из STACK, проверяет не равно ли первое второму, если верно, то  выполняет JMP по адресу                      | IMM, REG, RAM           |
+| CALL    | 18          | Перемещается на кусок кода, находящийся по адресу, находящемуся в аргументе и записывает в  CALLBACK_STACK адрес, откуда вызывается команда | IMM, REG, RAM           |
+| RET     | 19          | Берет адрес из верхушки CALLBACK_STACK и переходит  на кусок кода, находящийся по этому адресу                                              | -                       |
+| PRINT   | 22          | Берет значение из верхушки стека и печатает в  консоль (или в output.txt) ASCII код этого  значения                                         | -                       |
+| HLT     | 9           | Заканчивает программу                                                                                                                       | -                       |
+
+<h2>Пример</h2>
+<h3>Числа Фиббоначи</h3>
+
+``` asm
+MAIN:
+        IN
+        CALL FIB
+        OUT
+        HLT
+
+FIB:
+        POP R8
+
+        PUSH R8
+        PUSH 0
+        JE BASE0
+
+        PUSH R8
+        PUSH 1
+        JE BASE1
+
+
+        PUSH R8 ; R8 - 1ST ARG
+        PUSH 1
+        SUB
+        POP R8
+        PUSH R8 ; R8 - 1
+
+        PUSH R8
+        PUSH 1
+        SUB
+        POP R8
+        PUSH R8 ; R8 - 2
+
+        CALL FIB
+        POP R9
+        POP R10
+        PUSH R9
+        PUSH R10
+        CALL FIB
+        ADD
+        RET
+
+BASE0:
+        PUSH 0
+        RET
+
+BASE1:
+        PUSH 1
+        RET
 ```
+<p>Вводим число 8:</p>
+
+![image](https://github.com/SvetoCopy/CPU/assets/65361271/0183fea0-6bb5-4978-90f0-8a4d74833dd4)
+
+<p>Результат:</p>
+
+![image](https://github.com/SvetoCopy/CPU/assets/65361271/9496843c-0eda-4cad-ad3f-2e0eef169382)
+
