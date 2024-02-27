@@ -1,12 +1,19 @@
 ﻿
 #include "assembler.h"
-int main()
+int main(int argc, const char* argv[])
 {
-	FileInfo file = FileInfoCtor("expr.txt");
+	if (argc < 3) {
+		printf("Usage: %s filename.asm output.bin\n", argv[0]);
+		return -1;
+	}
+		
+	FileInfo file = FileInfoCtor(argv[1]);
 	char* cs = {};
 	Assembler Asm = {};
+
 	AssemblerCtor(&Asm, cs, &file);
 	AssemblyProgram(&Asm);
-	AssemblerOutputFile(&Asm, "C:\\Users\\Рузаль\\Desktop\\CPU\\SPU\\bytecode.txt");
+	AssemblerOutputFile(&Asm, argv[2]);
+
 	return 0;
 }

@@ -19,11 +19,13 @@ const int POISON = INT_MAX;
 
 #ifdef _DEBUG
 typedef unsigned long long Canary_t;
-const int ALIGNMENT = sizeof(Elem_t) > sizeof(Canary_t) ? sizeof(Elem_t) : sizeof(Canary_t);
+const int ALIGNMENT   = sizeof(Elem_t) > sizeof(Canary_t) ? sizeof(Elem_t) : sizeof(Canary_t);
+const int STACK_ERROR = -1;
+
 const Canary_t STRUCT_CANARY_L_VAL = 0xFEE1DEAD;
 const Canary_t STRUCT_CANARY_R_VAL = 0xFEE1DEAD;
-const Canary_t DATA_CANARY_L_VAL = 0xDEADDEAD;
-const Canary_t DATA_CANARY_R_VAL = 0xDEADDEAD;
+const Canary_t DATA_CANARY_L_VAL   = 0xDEADDEAD; 
+const Canary_t DATA_CANARY_R_VAL   = 0xDEADDEAD;
 
 enum Errors
 {

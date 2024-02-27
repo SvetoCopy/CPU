@@ -1,3 +1,6 @@
+//      name +--- code 
+//       |   |
+//       v   v
 DEF_REG(rax, 0)
 DEF_REG(rbx, 1)
 DEF_REG(rcx, 2)

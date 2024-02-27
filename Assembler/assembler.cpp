@@ -1,6 +1,9 @@
 #include "assembler.h"
 
 int AssemblerOutputFile(Assembler* ASM, const char* filename) {
+
+	assert(ASM != nullptr);
+
 	FILE* res = {};
 	fopen_s(&res, filename, "wb");
 
@@ -12,6 +15,9 @@ int AssemblerOutputFile(Assembler* ASM, const char* filename) {
 }
 
 int AssemblerInsertIntCode(Assembler* ASM, int code) {
+
+	assert(ASM != nullptr);
+
 	*(int*)(ASM->code_seg + ASM->code_seg_size) = code;
 	ASM->code_seg_size += sizeof(int);
 
@@ -19,6 +25,9 @@ int AssemblerInsertIntCode(Assembler* ASM, int code) {
 }
 
 int AssemblerInsertDoubleCode(Assembler* ASM, double code) {
+
+	assert(ASM != nullptr);
+
 	*(double*)(ASM->code_seg + ASM->code_seg_size) = code;
 	ASM->code_seg_size += sizeof(double);
 
@@ -26,6 +35,9 @@ int AssemblerInsertDoubleCode(Assembler* ASM, double code) {
 }
 
 int LabelCtor(Label* label, char* name, double address) {
+
+	assert(label != nullptr);
+
 	label->name    = _strdup(name);
 	label->address = address;
 
@@ -33,6 +45,9 @@ int LabelCtor(Label* label, char* name, double address) {
 }
 
 int LabelDtor(Label* label) {
+
+	assert(label != nullptr);
+
 	free(label->name);
 	label->address = POISON;
 	label->name    = nullptr;
@@ -41,6 +56,9 @@ int LabelDtor(Label* label) {
 }
 
 int LabelDump(Label* label) {
+
+	assert(label != nullptr);
+
 	printf("%s: %f \n", label->name, label->address);
 
 	return 0;
@@ -55,14 +73,23 @@ int LabelVerify(Label* label) {
 }
 
 int AssemblerCtor(Assembler* asm_ptr, char* CodeSeg, FileInfo* file) {
+
+	assert(asm_ptr != nullptr);
+
 	asm_ptr->code_seg = (char*)calloc(file->buff_size, sizeof(double) + sizeof(char*));;
 	asm_ptr->file    = file;
 	asm_ptr->labels  = (Label*)calloc(INITIAL_COUNT_LABELS, sizeof(double) + sizeof(char*));
+
+	assert(asm_ptr->labels   != nullptr);
+	assert(asm_ptr->code_seg != nullptr);
 
 	return 0;
 }
 
 int AssemblerDtor(Assembler* asm_ptr) {
+
+	assert(asm_ptr != nullptr);
+
 	for (int i = 0; i < asm_ptr->labels_count; i++) LabelDtor(&asm_ptr->labels[i]);
 
 	FileInfoDtor(asm_ptr->file);
@@ -75,12 +102,16 @@ int AssemblerDtor(Assembler* asm_ptr) {
 }
 
 int AssemblerDump(Assembler* asm_ptr) {
+
+	assert(asm_ptr != nullptr);
+
 	for (int i = 0; i < asm_ptr->labels_count; i++) LabelDump(&asm_ptr->labels[i]);
 	
-	size_t iter = 0;
+	size_t iter  = 0;
 	char* cs_var = asm_ptr->code_seg;
 
 	printf("\n------------------------\n");
+
 	while (iter < asm_ptr->code_seg_size) {
 		Opcode opcode = *(Opcode*)((int*)(cs_var));
 		printf(" %d ", *(int*)(cs_var));
@@ -109,18 +140,25 @@ int AssemblerDump(Assembler* asm_ptr) {
 			}
 		}
 	}
+
 	printf("\n------------------------\n");
 
 	return 0;
 }
 
 int AssemblerVerify(Assembler* asm_ptr) {
+
+	assert(asm_ptr != nullptr);
+
 	for (int i = 0; i < asm_ptr->labels_count; i++) LabelVerify(&asm_ptr->labels[i]);
 
 	return 0;
 }
 
 ArgType FindLabelAddr(Assembler* asm_ptr, char* str, double* address) {
+
+	assert(asm_ptr != nullptr);
+
 	for (int i = 0; i < asm_ptr->labels_count; i++) {
 		if (strcmp(str, asm_ptr->labels[i].name) == 0) {
 			*address = asm_ptr->labels[i].address;
@@ -140,10 +178,14 @@ ArgType DetermineReg(char* str, int* reg_id) {
 		return REG;                     \
 	}
 	#include "..\resource\def_reg.h"
+
 	return UNDEFINED;
 }
 
 int CreateLabel(Assembler* asm_ptr, char* name, int address) {
+
+	assert(asm_ptr != nullptr);
+
 	LabelCtor(&asm_ptr->labels[asm_ptr->labels_count], name, address);
 	asm_ptr->labels_count++;
 
@@ -151,11 +193,15 @@ int CreateLabel(Assembler* asm_ptr, char* name, int address) {
 }
 
 ArgType DetermineRAM(char* str, int* address_num) {
-	char word_in_brackets[MAX_RAM_LEN];
-	int arg_count = sscanf(str, "[%[^]]", &word_in_brackets);
 
-	if (arg_count == 0) return UNDEFINED;
+	char word_in_brackets[MAX_RAM_LEN] = "";
+	int  read_count = -1;
+	int  arg_count  = sscanf(str, "[%[^]]%n", &word_in_brackets, &read_count);
 
+	if (arg_count == 0 && read_count == -1) {
+		return UNDEFINED;
+	}
+		
 	int reg = 0;
 	ArgType arg_type = DetermineReg(word_in_brackets, &reg);
 	if (arg_type != UNDEFINED) {
@@ -173,16 +219,22 @@ ArgType DetermineRAM(char* str, int* address_num) {
 }
 
 ArgType AssemblyRegCommand(Assembler* ASM, int command_code, int address_num) {
+
+	assert(ASM != nullptr);
+
 	Opcode opcode = { command_code, REG };
 	command_code = *(int*)(&opcode);
 
 	AssemblerInsertIntCode(ASM, command_code); 
-	AssemblerInsertIntCode(ASM, address_num);
+	AssemblerInsertIntCode(ASM, address_num); // 11000001
 
 	return REG;
 }
 
 ArgType AssemblyRAM(Assembler* ASM, int command_code, int address_num, ArgType ram_arg_type) {
+
+	assert(ASM != nullptr);
+
 	Opcode opcode = { command_code, ram_arg_type };
 	command_code = *(int*)(&opcode);
 
@@ -193,6 +245,9 @@ ArgType AssemblyRAM(Assembler* ASM, int command_code, int address_num, ArgType r
 }
 
 ArgType AssemblyLabel(Assembler* ASM, int command_code, double address) {
+
+	assert(ASM != nullptr);
+
 	Opcode opcode = { command_code, IMM };
 	command_code = *(int*)(&opcode);
 
@@ -203,6 +258,9 @@ ArgType AssemblyLabel(Assembler* ASM, int command_code, double address) {
 }
 
 ArgType AssemblyStrArg(Assembler* ASM, char* str, int command_code, size_t passage) {
+
+	assert(ASM != nullptr);
+
 	char type_str[COMMAND_SIZE] = {};
 	char arg_text[COMMAND_SIZE] = {};
 
@@ -225,6 +283,9 @@ ArgType AssemblyStrArg(Assembler* ASM, char* str, int command_code, size_t passa
 }
 
 ArgType AssemblyImmArg(Assembler* ASM, char* str, int command_code) {
+
+	assert(ASM != nullptr);
+
 	char   type_str[COMMAND_SIZE] = {};
 	double value                  = 0;
 
@@ -240,13 +301,16 @@ ArgType AssemblyImmArg(Assembler* ASM, char* str, int command_code) {
 }
 
 ArgType AssemblyArg(Assembler* ASM, char* str, int command_code, bool arg_is_imm, size_t passage) {
+
+	assert(ASM != nullptr);
+
 	if (arg_is_imm == false) return AssemblyStrArg(ASM, str, command_code, passage);
 
 	return AssemblyImmArg(ASM, str, command_code);
 }
 
-
 void RemoveComments(char* str) {
+
 	while (*str != '\0') {
 		if (*str == ';') {
 			*str = '\0';
@@ -258,6 +322,7 @@ void RemoveComments(char* str) {
 }
 
 int VerifyCommand(char* str, int args_count) {
+
 	char tmp1[COMMAND_SIZE] = {};
 	char tmp2[COMMAND_SIZE] = {};
 	int  read_size          = 0;
@@ -274,10 +339,12 @@ int VerifyCommand(char* str, int args_count) {
 }
 
 ParseStatus ParseCommand(char* str, char* buffer, int* command_code) {
+
 	if (0) {}
 	#define DEF_CMD(cmd_name, cmd_code, cmd_args_num, ...)                 \
 	else if (strcmp(buffer, #cmd_name) == 0){                              \
 		*command_code = cmd_code;                                          \
+																		   \
 		if (VerifyCommand(str, cmd_args_num) == ERROR) return PARSE_ERROR; \
 		return FOUND;                                                      \
 	}
@@ -288,7 +355,11 @@ ParseStatus ParseCommand(char* str, char* buffer, int* command_code) {
 }
 
 ParseStatus ParseLabel(Assembler* asm_ptr, char* buffer, int passage) {
+
+	assert(asm_ptr != nullptr);
+
 	int buffer_len = strlen(buffer);
+
 	if (buffer[buffer_len - 1] == ':') {
 		if (passage == 1) {
 			buffer[buffer_len - 1] = '\0';
@@ -302,11 +373,17 @@ ParseStatus ParseLabel(Assembler* asm_ptr, char* buffer, int passage) {
 }
 
 ArgType AssemblyCmdWithArgs(Assembler* ASM, char* str, int command_code, bool arg_is_imm, size_t passage) {
+	
+	assert(ASM != nullptr);
+
 	ArgType arg_type = EMPTY;
+	
 	#define DEF_CMD(cmd_name, cmd_code, cmd_args_num, ...)                     \
 	if ((command_code == cmd_code) && (cmd_args_num == 1)) {                   \
+																			   \
 		arg_type = AssemblyArg(ASM, str, command_code, arg_is_imm, passage);   \
 		if (arg_type == UNDEFINED) return UNDEFINED;                           \
+																			   \
 		return arg_type;                                                       \
 	}
 	#include "../resource/def_cmd.h"
@@ -317,10 +394,14 @@ ArgType AssemblyCmdWithArgs(Assembler* ASM, char* str, int command_code, bool ar
 
 // NoArgs
 void AssemblyCmdNoArgs(Assembler* ASM, int command_code) {
+
+	assert(ASM != nullptr);
+
 	AssemblerInsertIntCode(ASM, command_code);
 }
 
 int AssemblyCommand(char* str, Assembler* asm_ptr, size_t passage) {
+
 	assert(str != 0);
 
 	double  value                  = 0;
@@ -329,18 +410,18 @@ int AssemblyCommand(char* str, Assembler* asm_ptr, size_t passage) {
 	char    buffer[COMMAND_SIZE]   = {};
 
 	RemoveComments(str);
-	// if ( isspace(*str) )
-	// if ( *str == '' || *str == '\n' )
+
 	if (*str == '\0' || *str == '\n') return 0;
 
 	// Trying to read imm arg
 	int arg_count = sscanf(str, "%s %lf", &buffer, &value);
 	if (arg_count <= 0) return ERROR;
 	
-
 	bool arg_is_imm = (arg_count == 2);
 	ParseStatus status = ParseCommand(str, buffer, &command_code);
+
 	if (status == CMD_UNFOUND) {
+
 		status = ParseLabel(asm_ptr, buffer, passage);
 
 		if (status == FOUND) return 0;
@@ -358,6 +439,7 @@ int AssemblyCommand(char* str, Assembler* asm_ptr, size_t passage) {
 }
 
 int AssemblyAllCommands(Assembler* asm_ptr, int passage) {
+
 	for (int i = 0; i < asm_ptr->file->n_lines; i++) {
 
 		AssemblerDump(asm_ptr);

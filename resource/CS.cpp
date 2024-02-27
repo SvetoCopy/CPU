@@ -1,16 +1,19 @@
 #include "CS.h"
 
 int CodeSegInsertFile(CodeSeg* code_seg, FileInfo* file) {
+
 	fread(code_seg->CodeSeg_ptr, sizeof(char), file->buff_size, file->input_file);
 	return 0;
 }
 
 static int SetError(unsigned* all_errors, int error) {
+
 	*all_errors |= (1 << error);
 	return 0;
 }
 
 static int CodeSegPrintErrorInfo(unsigned error, CodeSeg* code_seg) {
+
 	FILE* file = code_seg->logfile.file;
 
 	#define check(error_code) ( error & (1 << error_code) ) == (1 << error_code)
@@ -23,6 +26,7 @@ static int CodeSegPrintErrorInfo(unsigned error, CodeSeg* code_seg) {
 
 
 int CodeSegCtor(CodeSeg* code_seg, size_t capacity) {
+
 	code_seg->CodeSeg_ptr = (char*)calloc(capacity, sizeof(char));
 	code_seg->capacity    = capacity;
 	code_seg->size        = 0;
@@ -32,6 +36,7 @@ int CodeSegCtor(CodeSeg* code_seg, size_t capacity) {
 
 
 int CodeSegDtor(CodeSeg* code_seg) {
+
 	free(code_seg->CodeSeg_ptr);
 	code_seg->capacity = 0;
 
@@ -39,8 +44,11 @@ int CodeSegDtor(CodeSeg* code_seg) {
 }
 
 int CodeSegVerify(CodeSeg* code_seg) {
+
 	unsigned error = 0;
+
 	if (code_seg == nullptr) assert("Code segment is null");
+
 	if (code_seg->CodeSeg_ptr == nullptr) {
 		SetError(&error, CS_NULLPTR);
 		fprintf(stderr, "CS_NULLPTR");
@@ -57,6 +65,7 @@ int CodeSegVerify(CodeSeg* code_seg) {
 
 // WARNING: GOVNOCODE
 int CodeSegDump(CodeSeg* code_seg, int ip) {
+
 	size_t iter  = 0;
 	char* cs_var = code_seg->CodeSeg_ptr;
 

@@ -1,0 +1,106 @@
+PUSH 0; R9 - Y  R10 - X
+POP R9 ;Y = 0
+
+CHECKIF1:
+PUSH R9 
+PUSH 25
+JA LOOP1 ; 25 > Y 
+JMP END
+
+LOOP1:
+
+PUSH 0
+POP R10 ; X = 0
+
+CHECKIF2:
+PUSH R10
+PUSH 25
+JA LOOP2 ; 25 > X
+JMP LOOP1ITER
+
+LOOP2:
+PUSH R10
+PUSH 1
+PUSH 14
+SUB
+ADD ; (x + 1 - center_x)
+PUSH R10
+PUSH 1
+PUSH 14
+SUB
+ADD 
+MUL ; 
+
+PUSH R9
+PUSH 1
+PUSH 14
+SUB
+ADD ; (Y + 1 - center_Y)
+PUSH R9
+PUSH 1
+PUSH 14
+SUB
+ADD 
+MUL ; (Y + 1 - center_Y)^2
+ADD ; ((x + 1 - center_x) * (x + 1 - center_x) + (y + 1 - center_y) * (y + 1 - center_y)
+PUSH 11
+PUSH 11
+MUL ; R^2
+JAE DRAWSTAR
+JMP DRAWNULL
+
+DRAWSTAR:
+PUSH 42 ; '*'
+PUSH R9
+PUSH 25
+MUL
+PUSH R10
+ADD ; y * width + x
+POP R8
+POP [R8]
+JMP LOOP2ITER
+
+DRAWNULL:
+PUSH 32 ; ' '
+PUSH R9
+PUSH 25
+MUL
+PUSH R10
+ADD ; y * width + x
+POP R8
+POP [R8]
+JMP LOOP2ITER
+
+LOOP1ITER:
+PUSH 1
+PUSH R9
+ADD     ; y+=1
+POP R9
+JMP CHECKIF1
+
+LOOP2ITER:
+PUSH 1
+PUSH R10
+ADD                         ; X += 1
+POP R10
+JMP CHECKIF2
+
+END:
+PRINT
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,162 @@
+____________DUMP____________
+Stack[000000625AF3F630]
+Object &(spu->stack) created in SPUCtor() from C:\Users\Рузаль\Desktop\CPU\SPU\SPU.cpp (79 line)
+Dump called in SPUDump() from C:\Users\Рузаль\Desktop\CPU\SPU\SPU.cpp (4 line)
+
+size = 0
+capacity = 2
+data[0xAE670598]
+hash_sum = 2113953700ll
+{
+3735936685ll
+*[0] = 0.000000
+*[1] = 0.000000
+0ll
+}
+____________________________
+____________DUMP____________
+Stack[000000625AF3F630]
+Object &(spu->stack) created in SPUCtor() from C:\Users\Рузаль\Desktop\CPU\SPU\SPU.cpp (79 line)
+Dump called in SPUDump() from C:\Users\Рузаль\Desktop\CPU\SPU\SPU.cpp (4 line)
+
+size = 0
+capacity = 2
+data[0xAE670598]
+hash_sum = 2113953700ll
+{
+3735936685ll
+*[0] = 0.000000
+*[1] = 0.000000
+0ll
+}
+____________________________
+____________DUMP____________
+Stack[000000625AF3F630]
+Object &(spu->stack) created in SPUCtor() from C:\Users\Рузаль\Desktop\CPU\SPU\SPU.cpp (79 line)
+Dump called in SPUDump() from C:\Users\Рузаль\Desktop\CPU\SPU\SPU.cpp (4 line)
+
+size = 0
+capacity = 2
+data[0xAE670598]
+hash_sum = 2113953700ll
+{
+3735936685ll
+*[0] = 0.000000
+*[1] = 0.000000
+0ll
+}
+____________________________
+____________DUMP____________
+Stack[000000625AF3F630]
+Object &(spu->stack) created in SPUCtor() from C:\Users\Рузаль\Desktop\CPU\SPU\SPU.cpp (79 line)
+Dump called in SPUDump() from C:\Users\Рузаль\Desktop\CPU\SPU\SPU.cpp (4 line)
+
+size = 0
+capacity = 2
+data[0xAE670598]
+hash_sum = 2113953700ll
+{
+3735936685ll
+*[0] = 0.000000
+*[1] = 0.000000
+0ll
+}
+____________________________
+____________DUMP____________
+Stack[000000625AF3F630]
+Object &(spu->stack) created in SPUCtor() from C:\Users\Рузаль\Desktop\CPU\SPU\SPU.cpp (79 line)
+Dump called in SPUDump() from C:\Users\Рузаль\Desktop\CPU\SPU\SPU.cpp (4 line)
+
+size = 0
+capacity = 2
+data[0xAE670598]
+hash_sum = 2113953700ll
+{
+3735936685ll
+*[0] = 0.000000
+*[1] = 0.000000
+0ll
+}
+____________________________
+____________DUMP____________
+Stack[000000625AF3F630]
+Object &(spu->stack) created in SPUCtor() from C:\Users\Рузаль\Desktop\CPU\SPU\SPU.cpp (79 line)
+Dump called in SPUDump() from C:\Users\Рузаль\Desktop\CPU\SPU\SPU.cpp (4 line)
+
+size = 0
+capacity = 2
+data[0xAE670598]
+hash_sum = 2113953700ll
+{
+3735936685ll
+*[0] = 0.000000
+*[1] = 0.000000
+0ll
+}
+____________________________
+____________DUMP____________
+Stack[000000625AF3F630]
+Object &(spu->stack) created in SPUCtor() from C:\Users\Рузаль\Desktop\CPU\SPU\SPU.cpp (79 line)
+Dump called in SPUDump() from C:\Users\Рузаль\Desktop\CPU\SPU\SPU.cpp (4 line)
+
+size = 1
+capacity = 2
+data[0xAE670598]
+hash_sum = 1526378477ll
+{
+3735936685ll
+*[0] = 3.000000
+*[1] = 0.000000
+0ll
+}
+____________________________
+____________DUMP____________
+Stack[000000625AF3F630]
+Object &(spu->stack) created in SPUCtor() from C:\Users\Рузаль\Desktop\CPU\SPU\SPU.cpp (79 line)
+Dump called in SPUDump() from C:\Users\Рузаль\Desktop\CPU\SPU\SPU.cpp (4 line)
+
+size = 0
+capacity = 2
+data[0xAE670598]
+hash_sum = 1130944421ll
+{
+3735936685ll
+*[0] = POISON
+*[1] = 0.000000
+0ll
+}
+____________________________
+____________DUMP____________
+Stack[000000625AF3F630]
+Object &(spu->stack) created in SPUCtor() from C:\Users\Рузаль\Desktop\CPU\SPU\SPU.cpp (79 line)
+Dump called in SPUDump() from C:\Users\Рузаль\Desktop\CPU\SPU\SPU.cpp (4 line)
+
+size = 1
+capacity = 2
+data[0xAE670598]
+hash_sum = 2735797199ll
+{
+3735936685ll
+*[0] = 4.000000
+*[1] = 0.000000
+0ll
+}
+____________________________
+____________DUMP____________
+Stack[000000625AF3F630]
+Object &(spu->stack) created in SPUCtor() from C:\Users\Рузаль\Desktop\CPU\SPU\SPU.cpp (79 line)
+Dump called in SPUDump() from C:\Users\Рузаль\Desktop\CPU\SPU\SPU.cpp (4 line)
+
+size = 2
+capacity = 4
+data[0xAE66AC28]
+hash_sum = 3586102554ll
+{
+3735936685ll
+*[0] = 4.000000
+*[1] = 3.000000
+*[2] = 0.000000
+*[3] = -6277438562204192487878988888393020692503707483087375482269988814848.000000
+0ll
+}
+____________________________
