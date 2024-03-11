@@ -1,5 +1,5 @@
-﻿
-#include "assembler.h"
+﻿#include "assembler.h"
+
 int main(int argc, const char* argv[])
 {
 	if (argc < 3) {
