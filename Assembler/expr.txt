@@ -1,46 +1,321 @@
+CALL main
+HLT
+SolveLinear:
 
-        IN
-        CALL FIB
-        OUT
-        HLT
+; the next operator has gone from 2 line
+PUSH 0.000000
+PUSH [1]
+SUB
+PUSH [0]
+DIV
+POP RAX
+RET
+Discr:
 
-FIB:
-        POP R8
+; the next operator has gone from 6 line
+PUSH [3]
+PUSH [3]
+MUL
+PUSH 4.000000
+PUSH [2]
+MUL
+PUSH [4]
+MUL
+SUB
+POP RAX
+RET
+GetFirstRoot:
 
-        PUSH R8
-        PUSH 0
-        JE BASE0
+; the next operator has gone from 10 line
+PUSH 0.000000
+PUSH [6]
+SUB
+PUSH [7]
+PUSH 1.000000
+PUSH 2.000000
+DIV
+POW
+ADD
+PUSH 2.000000
+PUSH [5]
+MUL
+DIV
+POP RAX
+RET
+GetSecondRoot:
 
-        PUSH R8
-        PUSH 1
-        JE BASE1
+; the next operator has gone from 14 line
+PUSH 0.000000
+PUSH [9]
+SUB
+PUSH [10]
+PUSH 1.000000
+PUSH 2.000000
+DIV
+POW
+SUB
+PUSH 2.000000
+PUSH [8]
+MUL
+DIV
+POP RAX
+RET
+PrintNoRoots:
 
+; the next operator has gone from 18 line
+PUSH 78.000000
+PRINT
 
-        PUSH R8 ; R8 - 1ST ARG
-        PUSH 1
-        SUB
-        POP R8
-        PUSH R8 ; R8 - 1
+; the next operator has gone from 19 line
+PUSH 79.000000
+PRINT
 
-        PUSH R8
-        PUSH 1
-        SUB
-        POP R8
-        PUSH R8 ; R8 - 2
+; the next operator has gone from 21 line
+PUSH 10.000000
+PRINT
 
-        CALL FIB
-        POP R9
-        POP R10
-        PUSH R9
-        PUSH R10
-        CALL FIB
-        ADD
-        RET
+; the next operator has gone from 23 line
+PUSH 0.000000
+POP RAX
+RET
+PrintInfRoots:
 
-BASE0:
-        PUSH 0
-        RET
+; the next operator has gone from 27 line
+PUSH 73.000000
+PRINT
 
-BASE1:
-        PUSH 1
-        RET
+; the next operator has gone from 28 line
+PUSH 78.000000
+PRINT
+
+; the next operator has gone from 29 line
+PUSH 70.000000
+PRINT
+
+; the next operator has gone from 31 line
+PUSH 10.000000
+PRINT
+
+; the next operator has gone from 33 line
+PUSH 0.000000
+POP RAX
+RET
+main:
+
+; the next operator has gone from 38 line
+PUSH 0.000000
+POP [11]
+
+; the next operator has gone from 39 line
+PUSH 0.000000
+POP [12]
+
+; the next operator has gone from 40 line
+PUSH 0.000000
+POP [13]
+
+; the next operator has gone from 42 line
+IN
+POP [11]
+
+; the next operator has gone from 43 line
+IN
+POP [12]
+
+; the next operator has gone from 44 line
+IN
+POP [13]
+
+; the next operator has gone from 46 line
+PUSH 0.000000
+PUSH [11]
+JE cond_1
+PUSH 0
+JMP end_cond2
+cond_1:
+PUSH 1
+end_cond2:
+PUSH 0
+JE end_if_3
+
+; the next operator has gone from 48 line
+PUSH 0.000000
+PUSH [12]
+JE cond_4
+PUSH 0
+JMP end_cond5
+cond_4:
+PUSH 1
+end_cond5:
+PUSH 0
+JE end_if_6
+
+; the next operator has gone from 49 line
+PUSH 0.000000
+PUSH [13]
+JE cond_7
+PUSH 0
+JMP end_cond8
+cond_7:
+PUSH 1
+end_cond8:
+PUSH 0
+JE end_if_9
+
+; the next operator has gone from 50 line
+PUSH [11] ; saving 0 arg
+PUSH [12] ; saving 1 arg
+PUSH [13] ; saving 2 arg
+PUSH [14] ; saving 3 arg
+CALL PrintInfRoots
+POP [14]; getting old 3 arg
+POP [13]; getting old 2 arg
+POP [12]; getting old 1 arg
+POP [11]; getting old 0 arg
+PUSH RAX
+
+; the next operator has gone from 52 line
+PUSH 0.000000
+POP RAX
+RET
+end_if_9:
+
+; the next operator has gone from 55 line
+PUSH [11] ; saving 0 arg
+PUSH [12] ; saving 1 arg
+PUSH [13] ; saving 2 arg
+PUSH [14] ; saving 3 arg
+CALL PrintNoRoots
+POP [14]; getting old 3 arg
+POP [13]; getting old 2 arg
+POP [12]; getting old 1 arg
+POP [11]; getting old 0 arg
+PUSH RAX
+
+; the next operator has gone from 57 line
+PUSH 0.000000
+POP RAX
+RET
+end_if_6:
+
+; the next operator has gone from 60 line
+PUSH [11] ; saving 0 arg
+PUSH [12] ; saving 1 arg
+PUSH [13] ; saving 2 arg
+PUSH [14] ; saving 3 arg
+PUSH [12]
+
+POP [0]
+PUSH [13]
+
+POP [1]
+CALL SolveLinear
+POP [14]; getting old 3 arg
+POP [13]; getting old 2 arg
+POP [12]; getting old 1 arg
+POP [11]; getting old 0 arg
+PUSH RAX
+OUT
+
+; the next operator has gone from 62 line
+PUSH 0.000000
+POP RAX
+RET
+end_if_3:
+
+; the next operator has gone from 65 line
+PUSH [11] ; saving 0 arg
+PUSH [12] ; saving 1 arg
+PUSH [13] ; saving 2 arg
+PUSH [14] ; saving 3 arg
+PUSH [11]
+
+POP [2]
+PUSH [12]
+
+POP [3]
+PUSH [13]
+
+POP [4]
+CALL Discr
+POP [14]; getting old 3 arg
+POP [13]; getting old 2 arg
+POP [12]; getting old 1 arg
+POP [11]; getting old 0 arg
+PUSH RAX
+POP [14]
+
+; the next operator has gone from 67 line
+PUSH 0.000000
+PUSH [14]
+JB cond_10
+PUSH 0
+JMP end_cond11
+cond_10:
+PUSH 1
+end_cond11:
+PUSH 0
+JE end_if_12
+
+; the next operator has gone from 69 line
+PUSH [11] ; saving 0 arg
+PUSH [12] ; saving 1 arg
+PUSH [13] ; saving 2 arg
+PUSH [14] ; saving 3 arg
+CALL PrintNoRoots
+POP [14]; getting old 3 arg
+POP [13]; getting old 2 arg
+POP [12]; getting old 1 arg
+POP [11]; getting old 0 arg
+PUSH RAX
+
+; the next operator has gone from 71 line
+PUSH 0.000000
+POP RAX
+RET
+end_if_12:
+
+; the next operator has gone from 74 line
+PUSH 0.000000
+PUSH [14]
+JE cond_13
+PUSH 0
+JMP end_cond14
+cond_13:
+PUSH 1
+end_cond14:
+PUSH 0
+JE end_if_15
+
+; the next operator has gone from 76 line
+PUSH [11] ; saving 0 arg
+PUSH [12] ; saving 1 arg
+PUSH [13] ; saving 2 arg
+PUSH [14] ; saving 3 arg
+PUSH [11]
+
+POP [5]
+PUSH [12]
+
+POP [6]
+PUSH [14]
+
+POP [7]
+CALL GetFirstRoot
+POP [14]; getting old 3 arg
+POP [13]; getting old 2 arg
+POP [12]; getting old 1 arg
+POP [11]; getting old 0 arg
+PUSH RAX
+OUT
+
+; the next operator has gone from 78 line
+PUSH 0.000000
+POP RAX
+RET
+end_if_15:
+
+; the next operator has gone from 82 line
+PUSH 0.000000
+POP RAX
+RET
